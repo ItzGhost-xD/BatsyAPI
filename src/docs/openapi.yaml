@@ -1,0 +1,492 @@
+openapi: 3.0.3
+info:
+  title: Discord Presence API
+  description: |
+    Production-grade REST + WebSocket API for real-time Discord presence data.
+
+    ## Features
+    - Real-time presence: online, idle, DND, offline, invisible
+    - Desktop / Mobile / Web platform detection
+    - Full activity parsing: Spotify, rich presence, games, streaming, custom status
+    - Redis-backed cache (ETag + Cache-Control)
+    - MongoDB analytics with 30-day history
+    - WebSocket subscriptions for live updates
+    - Horizontal sharding support
+
+    ## Authentication
+    Pass your API key via the `Authorization` header:
+    ```
+    Authorization: Bearer YOUR_API_KEY
+    ```
+    Or use the `x-api-key` header. Authentication is optional unless `API_KEY_REQUIRED=true`.
+
+    ## Response Format
+    Requests from browsers (`Accept: text/html`) return a rendered HTML card.
+    Add `?format=json` or send `Accept: application/json` to always get JSON.
+
+    ## WebSocket
+    Connect to `ws://your-host/ws` — see the [WebSocket docs](#section/WebSocket-Protocol) below.
+
+    ## WebSocket Protocol
+    After connecting, send JSON messages:
+    ```json
+    { "type": "SUBSCRIBE", "userId": "123456789" }
+    { "type": "UNSUBSCRIBE", "userId": "123456789" }
+    { "type": "SUBSCRIBE_BULK", "userIds": ["123", "456"] }
+    { "type": "FETCH", "userId": "123456789" }
+    { "type": "PING" }
+    ```
+    The server pushes `PRESENCE_UPDATE` events whenever a subscribed user's presence changes.
+
+  version: 1.0.0
+  contact:
+    name: API Support
+    url: https://github.com/your-org/discord-presence-api
+
+servers:
+  - url: http://localhost:3000/v1
+    description: Local development
+  - url: https://your-api.com/v1
+    description: Production
+
+tags:
+  - name: Users
+    description: Presence and profile lookups
+  - name: Analytics
+    description: Historical stats and trends
+  - name: System
+    description: Health checks and meta
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  schemas:
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "123456789012345678"
+        username:
+          type: string
+          example: "discorduser"
+        displayName:
+          type: string
+          example: "Cool User"
+        discriminator:
+          type: string
+          nullable: true
+          example: null
+        avatarUrl:
+          type: string
+          example: "https://cdn.discordapp.com/avatars/123/abc.png"
+        bannerUrl:
+          type: string
+          nullable: true
+        bannerColor:
+          type: string
+          nullable: true
+          example: "#5865F2"
+        bot:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    ClientStatus:
+      type: object
+      properties:
+        desktop:
+          type: string
+          nullable: true
+          enum: [online, idle, dnd, offline, null]
+        mobile:
+          type: string
+          nullable: true
+          enum: [online, idle, dnd, offline, null]
+        web:
+          type: string
+          nullable: true
+          enum: [online, idle, dnd, offline, null]
+
+    CustomStatus:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [custom]
+        name:
+          type: string
+        state:
+          type: string
+          nullable: true
+        emoji:
+          type: object
+          nullable: true
+          properties:
+            name:
+              type: string
+            id:
+              type: string
+              nullable: true
+            animated:
+              type: boolean
+            url:
+              type: string
+              nullable: true
+
+    SpotifyActivity:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [spotify]
+        trackId:
+          type: string
+        song:
+          type: string
+        artist:
+          type: string
+        album:
+          type: string
+        albumArt:
+          type: string
+          nullable: true
+        trackUrl:
+          type: string
+        duration:
+          type: object
+          properties:
+            start:
+              type: integer
+            end:
+              type: integer
+            durationMs:
+              type: integer
+
+    RichPresence:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [rich_presence, game, streaming, watching, competing]
+        name:
+          type: string
+        applicationId:
+          type: string
+          nullable: true
+        details:
+          type: string
+          nullable: true
+        state:
+          type: string
+          nullable: true
+        largeImage:
+          type: object
+          properties:
+            key:
+              type: string
+              nullable: true
+            text:
+              type: string
+              nullable: true
+            url:
+              type: string
+              nullable: true
+        smallImage:
+          type: object
+          properties:
+            key:
+              type: string
+              nullable: true
+            text:
+              type: string
+              nullable: true
+            url:
+              type: string
+              nullable: true
+        timestamps:
+          type: object
+          nullable: true
+          properties:
+            start:
+              type: integer
+              nullable: true
+            end:
+              type: integer
+              nullable: true
+
+    Activities:
+      type: object
+      properties:
+        all:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/CustomStatus'
+              - $ref: '#/components/schemas/SpotifyActivity'
+              - $ref: '#/components/schemas/RichPresence'
+        customStatus:
+          $ref: '#/components/schemas/CustomStatus'
+          nullable: true
+        spotify:
+          $ref: '#/components/schemas/SpotifyActivity'
+          nullable: true
+        games:
+          type: array
+          items:
+            $ref: '#/components/schemas/RichPresence'
+        streaming:
+          $ref: '#/components/schemas/RichPresence'
+          nullable: true
+
+    PresenceData:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: "123456789012345678"
+        status:
+          type: string
+          enum: [online, idle, dnd, offline, invisible]
+        clientStatus:
+          $ref: '#/components/schemas/ClientStatus'
+        activities:
+          $ref: '#/components/schemas/Activities'
+        user:
+          $ref: '#/components/schemas/UserProfile'
+        guildId:
+          type: string
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+
+    PresenceResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/PresenceData'
+        meta:
+          type: object
+          properties:
+            source:
+              type: string
+              enum: [cache, live, none]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+
+paths:
+  /users/{id}:
+    get:
+      tags: [Users]
+      summary: Get user profile + presence
+      description: Returns the full user profile merged with current presence data. Browsers get an HTML card; add `?format=json` for JSON.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Discord user snowflake ID
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum: [json, html]
+          description: Force response format (default depends on Accept header)
+      responses:
+        '200':
+          description: User found
+          headers:
+            ETag:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+            X-Cache:
+              schema:
+                type: string
+                enum: [HIT, MISS]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresenceResponse'
+            text/html:
+              schema:
+                type: string
+                description: Rendered presence card
+        '400':
+          description: Invalid user ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+
+  /users/{id}/presence:
+    get:
+      tags: [Users]
+      summary: Get presence only
+      description: Lightweight endpoint returning only presence data (no full profile).
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Presence data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresenceResponse'
+            text/html:
+              schema:
+                type: string
+        '404':
+          description: Not found
+
+  /users/{id}/status:
+    get:
+      tags: [Users]
+      summary: Get status string only
+      description: Ultra-lightweight — returns just the status and platform flags. Great for polling.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  userId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [online, idle, dnd, offline, invisible]
+                  clientStatus:
+                    $ref: '#/components/schemas/ClientStatus'
+                  updatedAt:
+                    type: string
+                    format: date-time
+
+  /users/{id}/history:
+    get:
+      tags: [Users]
+      summary: Presence history snapshots
+      description: Returns historical presence snapshots from MongoDB (up to 200). Data is stored for 30 days.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+            maximum: 200
+        - in: query
+          name: since
+          schema:
+            type: string
+            format: date-time
+          description: ISO 8601 datetime filter
+      responses:
+        '200':
+          description: Snapshot list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  count:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /analytics/overview:
+    get:
+      tags: [Analytics]
+      summary: 24-hour API and presence stats
+      responses:
+        '200':
+          description: Overview
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /analytics/status-over-time/{id}:
+    get:
+      tags: [Analytics]
+      summary: Status frequency over time for a user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: hours
+          schema:
+            type: integer
+            default: 24
+            maximum: 168
+      responses:
+        '200':
+          description: Time-series data
+
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      description: Returns status of Redis, MongoDB, and Discord bot. Returns 503 if any service is down.
+      responses:
+        '200':
+          description: All healthy
+        '503':
+          description: One or more services degraded
+
+security:
+  - BearerAuth: []
+  - ApiKeyHeader: []

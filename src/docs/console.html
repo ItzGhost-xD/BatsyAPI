@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Presence API — Live Test Console</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #111214;
+      --surface: #1e1f22;
+      --surface2: #2b2d31;
+      --surface3: #313338;
+      --border: #404249;
+      --text: #dbdee1;
+      --text-muted: #80848e;
+      --accent: #5865f2;
+      --green: #23a55a;
+      --yellow: #f0b232;
+      --red: #f23f43;
+      --spotify: #1db954;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: 56px 1fr;
+      grid-template-columns: 1fr;
+    }
+
+    /* ── Header ─────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px;
+    }
+    .logo { font-size: 20px; font-weight: 800; color: var(--accent); letter-spacing: -.5px; }
+    .logo span { color: var(--text-muted); font-weight: 400; font-size: 14px; margin-left: 6px; }
+    .ws-badge {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      transition: all .2s;
+    }
+    .ws-badge.connected { color: var(--green); border-color: var(--green); }
+    .ws-badge.connected::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    .ws-badge:not(.connected)::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+
+    /* ── Main layout ─────────────────────────── */
+    main {
+      display: grid;
+      grid-template-columns: 340px 1fr 320px;
+      grid-template-rows: 1fr;
+      height: calc(100vh - 56px);
+      overflow: hidden;
+    }
+
+    /* ── Panel base ──────────────────────────── */
+    .panel {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .panel:last-child { border-right: none; }
+    .panel-header {
+      padding: 14px 16px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .panel-body { flex: 1; overflow-y: auto; padding: 16px; }
+    .panel-body::-webkit-scrollbar { width: 4px; }
+    .panel-body::-webkit-scrollbar-track { background: transparent; }
+    .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── Left panel — controls ───────────────── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .input-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    input[type="text"] {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]::placeholder { color: var(--text-muted); }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: filter .15s, transform .1s;
+      white-space: nowrap;
+    }
+    .btn:hover { filter: brightness(1.15); }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
+
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    /* Subscribed users list */
+    .subscribed-list { display: flex; flex-direction: column; gap: 6px; }
+    .sub-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: var(--surface2);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .sub-item .user-id { flex: 1; font-family: monospace; font-size: 12px; color: var(--text-muted); word-break: break-all; }
+    .sub-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .status-online { background: var(--green); }
+    .status-idle { background: var(--yellow); }
+    .status-dnd { background: var(--red); }
+    .status-offline { background: var(--text-muted); }
+
+    /* Quick message buttons */
+    .quick-btns { display: flex; flex-direction: column; gap: 6px; }
+    .quick-btn {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 12px;
+      text-align: left;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+      font-family: monospace;
+    }
+    .quick-btn:hover { background: var(--surface3); border-color: var(--accent); }
+
+    /* ── Middle panel — presence cards ────────── */
+    #cards-container { display: flex; flex-direction: column; gap: 16px; }
+
+    .presence-card {
+      background: var(--surface);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      animation: slideIn .2s ease;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card-banner {
+      height: 60px;
+      position: relative;
+      background: linear-gradient(135deg, #5865f2, #7950f2);
+    }
+    .card-banner img { width: 100%; height: 100%; object-fit: cover; }
+
+    .card-avatar-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      padding: 0 14px;
+      margin-top: -28px;
+      margin-bottom: 4px;
+    }
+    .card-avatar {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .card-avatar img {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      border: 3px solid var(--surface);
+      background: var(--surface3);
+      display: block;
+    }
+    .card-avatar .dot {
+      position: absolute;
+      bottom: 2px; right: 2px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--surface);
+    }
+    .card-name-row { flex: 1; padding-top: 30px; }
+    .card-name { font-weight: 700; font-size: 15px; color: #f2f3f5; }
+    .card-username { font-size: 12px; color: var(--text-muted); }
+
+    .card-body { padding: 0 14px 14px; }
+
+    .status-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .tag-platform { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+
+    .activity-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--surface2);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    .chip-icon { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; flex-shrink: 0; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+    .chip-text { flex: 1; min-width: 0; }
+    .chip-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+    .chip-main { font-weight: 600; color: #f2f3f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chip-sub { color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .card-footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      background: var(--surface2);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .card-footer-row a { color: var(--accent); text-decoration: none; }
+    .card-footer-row a:hover { text-decoration: underline; }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+    .empty-state code { background: var(--surface2); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+
+    /* ── Right panel — log ───────────────────── */
+    #log {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+    .log-entry {
+      padding: 6px 8px;
+      border-radius: 6px;
+      line-height: 1.5;
+      word-break: break-all;
+      animation: fadeIn .15s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .log-entry.in { background: #5865f211; color: #949cf7; border-left: 2px solid var(--accent); }
+    .log-entry.out { background: #23a55a11; color: #4fdc82; border-left: 2px solid var(--green); }
+    .log-entry.sys { background: var(--surface2); color: var(--text-muted); border-left: 2px solid var(--border); }
+    .log-entry.err { background: #f23f4311; color: #f57070; border-left: 2px solid var(--red); }
+    .log-time { opacity: .6; margin-right: 4px; }
+
+    /* ── REST tester ──────────────────────────── */
+    .rest-row { display: flex; gap: 6px; margin-bottom: 8px; }
+    .rest-method {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--green);
+      border-radius: 6px;
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+    }
+
+    #rest-result {
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--text);
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      border: 1px solid var(--border);
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; grid-template-rows: auto; }
+      .panel { border-right: none; border-bottom: 1px solid var(--border); max-height: 400px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">discord<span>presence</span></div>
+  <div class="ws-badge" id="ws-badge">Disconnected</div>
+</header>
+
+<main>
+
+  <!-- ── LEFT: Controls ─────────────────────── -->
+  <div class="panel">
+    <div class="panel-header">
+      Controls
+      <button class="btn btn-ghost btn-sm" id="btn-connect">Connect</button>
+    </div>
+    <div class="panel-body">
+
+      <div class="section-title">Subscribe to User</div>
+      <div class="input-row">
+        <input type="text" id="user-id-input" placeholder="Discord User ID..." maxlength="20">
+        <button class="btn btn-primary" id="btn-subscribe">Sub</button>
+      </div>
+
+      <div class="section-title">Subscribed</div>
+      <div class="subscribed-list" id="subscribed-list">
+        <div style="font-size:12px;color:var(--text-muted);font-style:italic">None yet</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section-title">REST Tester</div>
+      <div class="input-row">
+        <input type="text" id="rest-user-id" placeholder="User ID...">
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn btn-ghost btn-sm" onclick="restFetch('presence')">Presence</button>
+        <button class="btn btn-ghost btn-sm" onclick="restFetch('status')">Status</button>
+        <button class="btn btn-ghost btn-sm" onclick="restFetch('history')">History</button>
+        <button class="btn btn-ghost btn-sm" onclick="restFetch('analytics')">Analytics</button>
+        <button class="btn btn-ghost btn-sm" onclick="restFetch('health')">Health</button>
+      </div>
+      <pre id="rest-result"></pre>
+
+      <div class="divider"></div>
+
+      <div class="section-title">Quick WS Messages</div>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="sendRaw('PING')">{"type":"PING"}</button>
+        <button class="quick-btn" onclick="sendSubBulk()">{"type":"SUBSCRIBE_BULK",...}</button>
+        <button class="quick-btn" onclick="sendRaw('UNSUB_ALL')">Unsubscribe all</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MIDDLE: Presence Cards ──────────────── -->
+  <div class="panel">
+    <div class="panel-header">
+      Live Presence
+      <span id="card-count" style="background:var(--surface2);padding:2px 8px;border-radius:999px;font-size:11px">0 users</span>
+    </div>
+    <div class="panel-body" id="cards-panel">
+      <div id="cards-container">
+        <div class="empty-state">
+          <div class="icon">👁️</div>
+          <p>Subscribe to a Discord user ID to see their live presence here.</p>
+          <br>
+          <p>Enter an ID on the left and click <strong>Sub</strong>, or send:<br>
+          <code>{"type":"SUBSCRIBE","userId":"..."}</code></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: Message Log ──────────────────── -->
+  <div class="panel">
+    <div class="panel-header">
+      Message Log
+      <button class="btn btn-ghost btn-sm" onclick="clearLog()">Clear</button>
+    </div>
+    <div class="panel-body" id="log-panel">
+      <div id="log"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // ── Config ────────────────────────────────────────────────────────
+  const API_BASE = `${location.protocol}//${location.host}/v1`;
+  const WS_URL   = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`;
+
+  // ── State ─────────────────────────────────────────────────────────
+  let ws = null;
+  const subscribed = new Map(); // userId → {status, data}
+
+  // ── Log ───────────────────────────────────────────────────────────
+  function log(type, msg) {
+    const el = document.getElementById('log');
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    const t = new Date().toLocaleTimeString('en-US', { hour12: false });
+    const text = typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2);
+    entry.innerHTML = `<span class="log-time">${t}</span>${escHtml(text)}`;
+    el.prepend(entry);
+    // Keep last 200 entries
+    while (el.children.length > 200) el.removeChild(el.lastChild);
+  }
+
+  function clearLog() { document.getElementById('log').innerHTML = ''; }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── WebSocket ─────────────────────────────────────────────────────
+  function connect() {
+    if (ws && ws.readyState < 2) { ws.close(); return; }
+
+    log('sys', `Connecting to ${WS_URL}...`);
+    ws = new WebSocket(WS_URL);
+
+    ws.onopen = () => {
+      document.getElementById('ws-badge').textContent = 'Connected';
+      document.getElementById('ws-badge').classList.add('connected');
+      document.getElementById('btn-connect').textContent = 'Disconnect';
+      log('sys', 'WebSocket connected ✅');
+
+      // Re-subscribe all existing users after reconnect
+      for (const userId of subscribed.keys()) {
+        wsSend({ type: 'SUBSCRIBE', userId });
+      }
+    };
+
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      log('in', JSON.stringify(msg));
+      handleServerMessage(msg);
+    };
+
+    ws.onerror = () => log('err', 'WebSocket error');
+
+    ws.onclose = (e) => {
+      document.getElementById('ws-badge').textContent = 'Disconnected';
+      document.getElementById('ws-badge').classList.remove('connected');
+      document.getElementById('btn-connect').textContent = 'Connect';
+      log('sys', `WebSocket closed (code ${e.code})`);
+
+      // Auto-reconnect after 3s unless user closed manually
+      if (e.code !== 1000) setTimeout(connect, 3000);
+    };
+  }
+
+  function wsSend(obj) {
+    if (!ws || ws.readyState !== 1) { log('err', 'Not connected'); return; }
+    const raw = JSON.stringify(obj);
+    ws.send(raw);
+    log('out', raw);
+  }
+
+  function handleServerMessage(msg) {
+    switch (msg.type) {
+      case 'SUBSCRIBED':
+        subscribed.set(msg.userId, { status: msg.current?.status || 'offline', data: msg.current });
+        if (msg.current) renderCard(msg.userId, msg.current);
+        updateSubList();
+        break;
+
+      case 'PRESENCE_UPDATE':
+        subscribed.set(msg.userId, { status: msg.data?.status || 'offline', data: msg.data });
+        if (msg.data) renderCard(msg.userId, msg.data);
+        updateSubList();
+        flashCard(msg.userId);
+        break;
+
+      case 'UNSUBSCRIBED':
+        subscribed.delete(msg.userId);
+        removeCard(msg.userId);
+        updateSubList();
+        break;
+
+      case 'SUBSCRIBED_BULK':
+        for (const [userId, data] of Object.entries(msg.current || {})) {
+          if (data) {
+            subscribed.set(userId, { status: data.status, data });
+            renderCard(userId, data);
+          }
+        }
+        updateSubList();
+        break;
+    }
+  }
+
+  // ── Presence Card Renderer ────────────────────────────────────────
+  const STATUS_COLORS = { online:'#23a55a', idle:'#f0b232', dnd:'#f23f43', offline:'#80848e', invisible:'#80848e' };
+  const STATUS_LABELS = { online:'Online', idle:'Idle', dnd:'Do Not Disturb', offline:'Offline', invisible:'Invisible' };
+
+  function renderCard(userId, data) {
+    const container = document.getElementById('cards-container');
+
+    // Remove empty state
+    const emptyState = container.querySelector('.empty-state');
+    if (emptyState) emptyState.remove();
+
+    let card = document.getElementById(`card-${userId}`);
+    const isNew = !card;
+    if (isNew) { card = document.createElement('div'); card.className = 'presence-card'; card.id = `card-${userId}`; }
+
+    const u = data.user || {};
+    const color = STATUS_COLORS[data.status] || STATUS_COLORS.offline;
+    const label = STATUS_LABELS[data.status] || 'Offline';
+    const cs = data.clientStatus || {};
+    const activities = data.activities?.all || [];
+
+    const platforms = ['desktop','mobile','web']
+      .filter((p) => cs[p] && cs[p] !== 'offline')
+      .map((p) => `<span class="tag tag-platform">${p === 'desktop' ? '🖥️' : p === 'mobile' ? '📱' : '🌐'} ${cs[p]}</span>`)
+      .join('');
+
+    const activitiesHtml = activities.map(renderActivityChip).join('');
+
+    card.innerHTML = `
+      <div class="card-banner" style="background:${u.bannerColor || 'linear-gradient(135deg,#5865f2,#7950f2)'}">
+        ${u.bannerUrl ? `<img src="${u.bannerUrl}" onerror="this.remove()">` : ''}
+      </div>
+      <div class="card-avatar-row">
+        <div class="card-avatar">
+          <img src="${u.avatarUrl || 'https://cdn.discordapp.com/embed/avatars/0.png'}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+          <div class="dot" style="background:${color}" title="${label}"></div>
+        </div>
+        <div class="card-name-row">
+          <div class="card-name">${escHtml(u.displayName || u.username || userId)}</div>
+          <div class="card-username">@${escHtml(u.username || userId)}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="unsubscribeUser('${userId}')" style="margin-left:auto;margin-top:30px">✕</button>
+      </div>
+      <div class="card-body">
+        <div class="status-tags">
+          <span class="tag" style="background:${color}22;color:${color};border:1px solid ${color}44">${label}</span>
+          ${platforms}
+        </div>
+        ${activitiesHtml}
+      </div>
+      <div class="card-footer-row">
+        <span>Updated ${new Date(data.updatedAt || Date.now()).toLocaleTimeString()}</span>
+        <a href="/v1/users/${userId}?format=json" target="_blank">JSON ↗</a>
+        <a href="/v1/users/${userId}" target="_blank">Card ↗</a>
+      </div>
+    `;
+
+    if (isNew) container.prepend(card);
+    updateCardCount();
+  }
+
+  function renderActivityChip(act) {
+    if (!act) return '';
+    switch (act.type) {
+      case 'custom':
+        return `<div class="activity-chip">
+          <div class="chip-icon">${act.emoji?.name || '💬'}</div>
+          <div class="chip-text">
+            <div class="chip-label" style="color:#b5bac1">Custom Status</div>
+            <div class="chip-main">${escHtml(act.state || act.name || '')}</div>
+          </div>
+        </div>`;
+      case 'spotify':
+        return `<div class="activity-chip">
+          <div class="chip-icon" style="background:#1db95422;font-size:18px">🎵</div>
+          <div class="chip-text">
+            <div class="chip-label" style="color:#1db954">Spotify</div>
+            <div class="chip-main">${escHtml(act.song || '')}</div>
+            <div class="chip-sub">by ${escHtml(act.artist || '')}</div>
+          </div>
+        </div>`;
+      case 'rich_presence':
+      case 'game':
+        return `<div class="activity-chip">
+          ${act.largeImage?.url ? `<img class="chip-icon" src="${act.largeImage.url}" style="border-radius:6px">` : `<div class="chip-icon">🎮</div>`}
+          <div class="chip-text">
+            <div class="chip-label" style="color:#b5bac1">Playing</div>
+            <div class="chip-main">${escHtml(act.name || '')}</div>
+            ${act.details ? `<div class="chip-sub">${escHtml(act.details)}</div>` : ''}
+          </div>
+        </div>`;
+      case 'streaming':
+        return `<div class="activity-chip" style="border-left:2px solid var(--red)">
+          <div class="chip-icon">🔴</div>
+          <div class="chip-text">
+            <div class="chip-label" style="color:var(--red)">Streaming</div>
+            <div class="chip-main">${escHtml(act.name || '')}</div>
+          </div>
+        </div>`;
+      default:
+        return `<div class="activity-chip">
+          <div class="chip-icon">⚡</div>
+          <div class="chip-text">
+            <div class="chip-label" style="color:#b5bac1">${escHtml(act.type || 'activity')}</div>
+            <div class="chip-main">${escHtml(act.name || '')}</div>
+          </div>
+        </div>`;
+    }
+  }
+
+  function flashCard(userId) {
+    const card = document.getElementById(`card-${userId}`);
+    if (!card) return;
+    card.style.boxShadow = '0 0 0 2px #5865f2';
+    setTimeout(() => { card.style.boxShadow = ''; }, 800);
+  }
+
+  function removeCard(userId) {
+    document.getElementById(`card-${userId}`)?.remove();
+    if (subscribed.size === 0) {
+      document.getElementById('cards-container').innerHTML = `
+        <div class="empty-state">
+          <div class="icon">👁️</div>
+          <p>Subscribe to a Discord user ID to see their live presence here.</p>
+        </div>`;
+    }
+    updateCardCount();
+  }
+
+  function updateCardCount() {
+    document.getElementById('card-count').textContent = `${subscribed.size} user${subscribed.size !== 1 ? 's' : ''}`;
+  }
+
+  // ── Subscribed list ───────────────────────────────────────────────
+  function updateSubList() {
+    const list = document.getElementById('subscribed-list');
+    if (subscribed.size === 0) {
+      list.innerHTML = '<div style="font-size:12px;color:var(--text-muted);font-style:italic">None yet</div>';
+      return;
+    }
+    list.innerHTML = [...subscribed.entries()].map(([id, { status }]) => `
+      <div class="sub-item">
+        <div class="sub-status status-${status}"></div>
+        <div class="user-id">${id}</div>
+        <button class="btn btn-ghost btn-sm" onclick="unsubscribeUser('${id}')">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function subscribeUser(userId) {
+    userId = userId?.trim();
+    if (!userId || !/^\d{17,20}$/.test(userId)) { log('err', 'Invalid user ID — must be 17-20 digit snowflake'); return; }
+    wsSend({ type: 'SUBSCRIBE', userId });
+  }
+
+  function unsubscribeUser(userId) {
+    wsSend({ type: 'UNSUBSCRIBE', userId });
+  }
+
+  // ── Quick WS buttons ──────────────────────────────────────────────
+  function sendRaw(type) {
+    if (type === 'PING') { wsSend({ type: 'PING' }); return; }
+    if (type === 'UNSUB_ALL') {
+      for (const userId of subscribed.keys()) wsSend({ type: 'UNSUBSCRIBE', userId });
+      return;
+    }
+  }
+
+  function sendSubBulk() {
+    const ids = [...subscribed.keys()].slice(0, 10);
+    if (ids.length === 0) { log('err', 'Subscribe to at least one user first'); return; }
+    wsSend({ type: 'SUBSCRIBE_BULK', userIds: ids });
+  }
+
+  // ── REST Tester ───────────────────────────────────────────────────
+  async function restFetch(endpoint) {
+    const userId = document.getElementById('rest-user-id').value.trim();
+    const resultEl = document.getElementById('rest-result');
+    resultEl.style.display = 'block';
+    resultEl.textContent = 'Loading...';
+
+    let url;
+    switch (endpoint) {
+      case 'presence':  url = `${API_BASE}/users/${userId}/presence?format=json`; break;
+      case 'status':    url = `${API_BASE}/users/${userId}/status`; break;
+      case 'history':   url = `${API_BASE}/users/${userId}/history`; break;
+      case 'analytics': url = `${API_BASE}/analytics/overview`; break;
+      case 'health':    url = `/health`; break;
+      default:          url = `${API_BASE}/users/${userId}?format=json`;
+    }
+
+    try {
+      const res = await fetch(url, { headers: { Accept: 'application/json' } });
+      const data = await res.json();
+      const cacheHeader = res.headers.get('x-cache') || '—';
+      resultEl.textContent = `/* ${res.status} ${res.statusText} | Cache: ${cacheHeader} */\n${JSON.stringify(data, null, 2)}`;
+    } catch (e) {
+      resultEl.textContent = `Error: ${e.message}`;
+    }
+  }
+
+  // ── Wire up UI ────────────────────────────────────────────────────
+  document.getElementById('btn-connect').addEventListener('click', connect);
+
+  document.getElementById('btn-subscribe').addEventListener('click', () => {
+    subscribeUser(document.getElementById('user-id-input').value);
+  });
+
+  document.getElementById('user-id-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') subscribeUser(e.target.value);
+  });
+
+  // Auto-connect on page load
+  connect();
+</script>
+</body>
+</html>

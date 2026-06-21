@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ Discord Presence API
+# Batsy - Discord Presence API
 
 **Production-grade REST + WebSocket API for real-time Discord presence data**
 
@@ -34,7 +34,7 @@ Status badges · Online/Idle/DND/Offline · Spotify · Rich Presence · Games ·
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Option A — Docker (recommended)
 
@@ -69,14 +69,14 @@ npm start
 
 ---
 
-## 🤖 Discord Bot Setup
+## Discord Bot Setup
 
 1. Go to [discord.com/developers/applications](https://discord.com/developers/applications) → **New Application**
 2. **Bot** tab → **Add Bot** → copy the token
 3. Paste it as `DISCORD_BOT_TOKEN` in your `.env`
 4. Under **Privileged Gateway Intents**, enable:
-   - ✅ **Server Members Intent**
-   - ✅ **Presence Intent**
+   -  **Server Members Intent**
+   -  **Presence Intent**
 5. Invite URL: `https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&scope=bot&permissions=0`
 6. The bot only needs to **share a guild** with users you want to track — no special permissions needed
 
@@ -84,7 +84,7 @@ npm start
 
 ---
 
-## 📡 REST API
+##  REST API
 
 **Base URL:** `/v1`
 
@@ -237,7 +237,7 @@ node scripts/ws-client.js 111111111111111111
 
 ---
 
-## ⚙️ Configuration
+##  Configuration
 
 Copy `.env.example` to `.env` and fill in:
 
@@ -260,7 +260,7 @@ Copy `.env.example` to `.env` and fill in:
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
                     ┌─────────────┐
@@ -289,7 +289,7 @@ Discord Gateway ──► presenceUpdate event ──► Redis cache + pub/sub �
 
 ---
 
-## 🌍 Deploying to a VPS
+##  Deploying to a VPS
 
 ```bash
 # 1. Clone on your server
@@ -329,7 +329,7 @@ SHARD_COUNT=3 SHARD_ID=2 PORT=3002 docker compose up -d
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 discord-presence-api/
@@ -377,7 +377,7 @@ discord-presence-api/
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 ```bash
 # Start the server (mock mode, no token needed)
@@ -400,6 +400,6 @@ curl "http://localhost:3000/v1/users/111111111111111111/status"   # status only
 
 ---
 
-## 📄 License
+##  License
 
 MIT — see [LICENSE](LICENSE)

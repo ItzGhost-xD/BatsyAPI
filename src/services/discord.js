@@ -8,7 +8,7 @@ const { PresenceSnapshot } = require('../models');
 let client = null;
 
 const PRESENCE_KEY      = (id) => redis.shardKey(`presence:${id}`);
-const PRESENCE_LAST_KEY = (id) => redis.shardKey(`presence:last:${id}`); // survives offline
+const PRESENCE_LAST_KEY = (id) => redis.shardKey(`presence:last:${id}`);
 const USER_KEY          = (id) => redis.shardKey(`user:${id}`);
 const PRESENCE_CHANNEL  = 'presence:updates';
 
@@ -23,8 +23,8 @@ async function start() {
       GatewayIntentBits.DirectMessages,
     ],
     partials: [Partials.User, Partials.GuildMember],
-    shards:      config.discord.shardId,
-    shardCount:  config.discord.shardCount,
+    shards:     config.discord.shardId,
+    shardCount: config.discord.shardCount,
   });
 
   client.on('clientReady', () => {
@@ -45,6 +45,42 @@ async function start() {
   return client;
 }
 
+// ── Fetch full user object (includes banner) via REST ─────────────────
+// member.user from guild fetch is a partial — missing banner, accentColor etc.
+// client.users.fetch with force:true hits /users/:id REST endpoint for full data.
+
+async function fetchFullUser(userId) {
+  try {
+    return await client.users.fetch(userId, { force: true });
+  } catch (e) {
+    logger.debug('fetchFullUser failed', { userId, err: e.message });
+    return null;
+  }
+}
+
+// ── Build user profile object from a full Discord user ────────────────
+
+function buildUserProfile(user) {
+  if (!user) return null;
+  return {
+    id:            user.id,
+    username:      user.username,
+    displayName:   user.displayName || user.globalName || user.username,
+    discriminator: user.discriminator !== '0' ? user.discriminator : null,
+    avatar:        user.avatar,
+    avatarUrl:     user.displayAvatarURL({ size: 256 }),
+    // bannerURL() only works on full user objects fetched via REST
+    banner:        user.banner    || null,
+    bannerUrl:     user.banner
+                    ? user.bannerURL({ size: 600 })
+                    : null,
+    bannerColor:   user.hexAccentColor || null,
+    accentColor:   user.accentColor    || null,
+    bot:           user.bot  || false,
+    createdAt:     user.createdAt?.toISOString() || null,
+  };
+}
+
 // ── Presence update handler ───────────────────────────────────────────
 
 async function handlePresenceUpdate(oldPresence, newPresence) {
@@ -53,19 +89,19 @@ async function handlePresenceUpdate(oldPresence, newPresence) {
   try {
     const parsed = parsePresence(newPresence);
 
-    // Short-lived cache (TTL matches config — refreshed on every update)
-    await redis.set(PRESENCE_KEY(parsed.userId), parsed, config.redis.ttl);
+    // If the parsed user is missing banner data, enrich with a REST fetch
+    if (parsed.user && !parsed.user.banner) {
+      const fullUser = await fetchFullUser(parsed.userId);
+      if (fullUser) parsed.user = buildUserProfile(fullUser);
+    }
 
-    // Long-lived "last known" cache — 7 days, never wiped when user goes offline
-    // This means we can always return something even if the user is invisible/offline
+    await redis.set(PRESENCE_KEY(parsed.userId), parsed, config.redis.ttl);
     await redis.set(PRESENCE_LAST_KEY(parsed.userId), parsed, 60 * 60 * 24 * 7);
 
-    // Cache user profile
     if (parsed.user) {
       await redis.set(USER_KEY(parsed.userId), parsed.user, config.redis.userTtl);
     }
 
-    // Analytics snapshot (fire-and-forget)
     PresenceSnapshot.create({
       userId:       parsed.userId,
       guildId:      parsed.guildId,
@@ -74,7 +110,6 @@ async function handlePresenceUpdate(oldPresence, newPresence) {
       activities:   parsed.activities.all,
     }).catch((e) => logger.error('Analytics write failed', { err: e.message }));
 
-    // Broadcast to WS subscribers
     await redis.publish(PRESENCE_CHANNEL, {
       type:   'PRESENCE_UPDATE',
       userId: parsed.userId,
@@ -87,45 +122,35 @@ async function handlePresenceUpdate(oldPresence, newPresence) {
   }
 }
 
-// ── Build an offline/invisible presence object for a member ──────────
+// ── Build offline presence object ─────────────────────────────────────
 
-function buildOfflinePresence(member) {
-  const user = member.user;
+function buildOfflinePresence(userId, fullUser, guildId) {
+  const profile = fullUser ? buildUserProfile(fullUser) : null;
   return {
-    userId: user.id,
-    status: 'offline',
+    userId,
+    status:       'offline',
     clientStatus: { desktop: null, mobile: null, web: null },
-    activities: { all: [], customStatus: null, spotify: null, games: [], streaming: null, watching: null, competing: null },
-    user: {
-      id:            user.id,
-      username:      user.username,
-      displayName:   user.displayName || user.globalName || user.username,
-      discriminator: user.discriminator !== '0' ? user.discriminator : null,
-      avatar:        user.avatar,
-      avatarUrl:     user.displayAvatarURL({ size: 256 }),
-      banner:        user.banner  || null,
-      bannerUrl:     user.bannerURL?.({ size: 600 }) || null,
-      bannerColor:   user.hexAccentColor || null,
-      accentColor:   user.accentColor    || null,
-      bot:           user.bot || false,
-      createdAt:     user.createdAt?.toISOString() || null,
+    activities:   {
+      all: [], customStatus: null, spotify: null,
+      games: [], streaming: null, watching: null, competing: null,
     },
-    guildId:   member.guild.id,
+    user:      profile,
+    guildId:   guildId || null,
     updatedAt: new Date().toISOString(),
-    offline:   true,   // flag so callers know this isn't a live presence
+    offline:   true,
   };
 }
 
 // ── Public helpers ────────────────────────────────────────────────────
 
 async function getPresence(userId) {
-  // 1. Redis hot cache (recent update)
+  // 1. Redis hot cache
   const cached = await redis.get(PRESENCE_KEY(userId));
   if (cached) return { data: cached, source: 'cache' };
 
   if (!client) return { data: null, source: 'none' };
 
-  // 2. Try fetching live from Discord
+  // 2. Live fetch — check guilds for presence
   for (const guild of client.guilds.cache.values()) {
     try {
       const member = await guild.members.fetch({ user: userId, force: true }).catch(() => null);
@@ -133,39 +158,47 @@ async function getPresence(userId) {
 
       const presence = member.presence;
 
+      // Always fetch full user via REST so we get banner + accentColor
+      const fullUser = await fetchFullUser(userId);
+
       if (presence && presence.status !== 'offline') {
-        // User is online/idle/dnd — parse and cache normally
+        // Online / idle / dnd
         const parsed = parsePresence(presence);
+
+        // Overwrite user with the richer REST-fetched profile
+        if (fullUser) parsed.user = buildUserProfile(fullUser);
+
         await redis.set(PRESENCE_KEY(parsed.userId), parsed, config.redis.ttl);
         await redis.set(PRESENCE_LAST_KEY(parsed.userId), parsed, 60 * 60 * 24 * 7);
         if (parsed.user) await redis.set(USER_KEY(parsed.userId), parsed.user, config.redis.userTtl);
+
         return { data: parsed, source: 'live' };
       }
 
-      // User is offline / invisible — build offline presence with their profile
-      // but first check if we have a last-known presence to enrich with
-      const lastKnown = await redis.get(PRESENCE_LAST_KEY(userId));
+      // Offline / invisible — build from REST-fetched full user
+      const lastKnown  = await redis.get(PRESENCE_LAST_KEY(userId));
+      const offlineData = buildOfflinePresence(userId, fullUser, guild.id);
 
-      const offlineData = buildOfflinePresence(member);
+      // Use last-known user profile if it's richer (e.g. has banner from when they were online)
+      if (lastKnown?.user?.banner && !offlineData.user?.banner) {
+        offlineData.user = lastKnown.user;
+      }
 
-      // Preserve user profile from last known if richer
-      if (lastKnown?.user) offlineData.user = lastKnown.user;
-
-      // Cache briefly so repeated calls don't hammer Discord API
       await redis.set(PRESENCE_KEY(userId), offlineData, 30);
       if (offlineData.user) await redis.set(USER_KEY(userId), offlineData.user, config.redis.userTtl);
 
       return { data: offlineData, source: 'live' };
+
     } catch (e) {
       logger.debug('getPresence guild fetch failed', { guild: guild.id, err: e.message });
     }
   }
 
-  // 3. Not in any shared guild — return last known presence marked as stale
+  // 3. Not in any shared guild — serve stale last-known
   const lastKnown = await redis.get(PRESENCE_LAST_KEY(userId));
   if (lastKnown) {
     return {
-      data: { ...lastKnown, status: 'offline', stale: true },
+      data:   { ...lastKnown, status: 'offline', stale: true },
       source: 'stale_cache',
     };
   }
@@ -179,27 +212,13 @@ async function getUser(userId) {
 
   if (!client) return { data: null, source: 'none' };
 
-  try {
-    const user = await client.users.fetch(userId, { force: true });
-    const profile = {
-      id:            user.id,
-      username:      user.username,
-      displayName:   user.displayName || user.globalName || user.username,
-      discriminator: user.discriminator !== '0' ? user.discriminator : null,
-      avatar:        user.avatar,
-      avatarUrl:     user.displayAvatarURL({ size: 256 }),
-      banner:        user.banner || null,
-      bannerUrl:     user.bannerURL?.({ size: 600 }) || null,
-      bannerColor:   user.hexAccentColor || null,
-      accentColor:   user.accentColor    || null,
-      bot:           user.bot || false,
-      createdAt:     user.createdAt?.toISOString() || null,
-    };
-    await redis.set(USER_KEY(userId), profile, config.redis.userTtl);
-    return { data: profile, source: 'live' };
-  } catch (e) {
-    return { data: null, source: 'none' };
-  }
+  // Always use REST fetch so banner is included
+  const fullUser = await fetchFullUser(userId);
+  if (!fullUser) return { data: null, source: 'none' };
+
+  const profile = buildUserProfile(fullUser);
+  await redis.set(USER_KEY(userId), profile, config.redis.userTtl);
+  return { data: profile, source: 'live' };
 }
 
 function getClient() { return client; }

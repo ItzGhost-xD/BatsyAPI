@@ -1,5 +1,7 @@
 const { createLogger, format, transports } = require('winston');
 const { combine, timestamp, colorize, printf, errors } = format;
+const path = require('path');
+const fs   = require('fs');
 const config = require('../../config');
 
 const logFormat = printf(({ level, message, timestamp, stack, ...meta }) => {
@@ -22,15 +24,23 @@ const logger = createLogger({
   ],
 });
 
-// Add file transport in production
+// Add rotating file transport in production — but only if the logs dir is writable
 if (config.server.env === 'production') {
-  const DailyRotate = require('winston-daily-rotate-file');
-  logger.add(new DailyRotate({
-    filename: 'logs/app-%DATE%.log',
-    datePattern: 'YYYY-MM-DD',
-    maxFiles: '14d',
-    format: combine(timestamp(), logFormat),
-  }));
+  try {
+    const logsDir = path.join(process.cwd(), 'logs');
+    fs.mkdirSync(logsDir, { recursive: true }); // create if missing
+
+    const DailyRotate = require('winston-daily-rotate-file');
+    logger.add(new DailyRotate({
+      filename:    path.join(logsDir, 'app-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxFiles:    '14d',
+      format:      combine(timestamp(), logFormat),
+    }));
+  } catch (e) {
+    // Can't write logs to disk (e.g. read-only container) — console only is fine
+    logger.warn('File logging disabled — cannot create logs directory: ' + e.message);
+  }
 }
 
 module.exports = logger;

@@ -23,6 +23,13 @@ const STATUS_LABELS = {
   invisible: 'Invisible',
 };
 
+function statusLabel(data) {
+  const base = STATUS_LABELS[data.status] || 'Offline';
+  if ((data.status === 'offline' || data.status === 'invisible') && data.stale) return base + ' (last seen)';
+  if (data.offline) return 'Offline';
+  return base;
+}
+
 function activityBadge(act) {
   if (!act) return '';
   switch (act.type) {
@@ -98,7 +105,7 @@ function renderHtml(data, meta = {}) {
   }
 
   const statusColor = STATUS_COLORS[data.status] || STATUS_COLORS.offline;
-  const statusLabel = STATUS_LABELS[data.status] || 'Offline';
+  const label = statusLabel(data);
   const user = data.user || {};
   const activities = data.activities?.all || [];
   const activitiesHtml = activities.map(activityBadge).join('');
@@ -302,15 +309,19 @@ function renderHtml(data, meta = {}) {
   <!-- Avatar + status dot -->
   <div class="avatar-wrap">
     <img class="avatar" src="${escHtml(user.avatarUrl || '')}" alt="avatar" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
-    <div class="status-dot" title="${statusLabel}"></div>
+    <div class="status-dot" title="${label}"></div>
   </div>
+
+  <!-- Stale/offline notice -->
+  ${data.stale ? `<div style="background:#f0b23222;border-bottom:1px solid #f0b23244;padding:6px 16px;font-size:12px;color:#f0b232;">⏱ Last known status — user may have gone offline or invisible</div>` : ''}
+  ${data.offline && !data.stale ? `<div style="background:#80848e22;border-bottom:1px solid #80848e44;padding:6px 16px;font-size:12px;color:#80848e;">● This user is currently offline or invisible</div>` : ''}
 
   <!-- User Info -->
   <div class="user-info">
     <div class="display-name">${escHtml(user.displayName || user.username || 'Unknown User')}</div>
     <div class="username">@${escHtml(user.username || '')}${user.discriminator ? '#' + user.discriminator : ''}</div>
     <div class="status-row">
-      <span class="status-pill">${statusLabel}</span>
+      <span class="status-pill">${label}</span>
       ${platformDots(data.clientStatus)}
     </div>
   </div>

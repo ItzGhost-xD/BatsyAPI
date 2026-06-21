@@ -25,7 +25,7 @@ function avatarUrl(userId, hash, size = 256) {
 function bannerUrl(userId, hash) {
   if (!hash) return null;
   const fmt = hash.startsWith('a_') ? 'gif' : 'png';
-  return `${CDN}/banners/${userId}/${hash}.${fmt}?size=600`;
+  return `${CDN}/banners/${userId}/${hash}.${fmt}?size=1024`;
 }
 
 function applicationIconUrl(appId, hash) {

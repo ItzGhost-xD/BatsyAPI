@@ -2,7 +2,7 @@ const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const config = require('../../config');
 const logger = require('../utils/logger');
 const redis  = require('./redis');
-const { parsePresence } = require('./presenceParser');
+const { parsePresence, avatarUrl, bannerUrl } = require('./presenceParser');
 const { PresenceSnapshot } = require('../models');
 
 let client = null;
@@ -45,9 +45,7 @@ async function start() {
   return client;
 }
 
-// ── Fetch full user object (includes banner) via REST ─────────────────
-// member.user from guild fetch is a partial — missing banner, accentColor etc.
-// client.users.fetch with force:true hits /users/:id REST endpoint for full data.
+// ── Safely fetch full user via REST (includes banner, accentColor) ────
 
 async function fetchFullUser(userId) {
   try {
@@ -58,24 +56,41 @@ async function fetchFullUser(userId) {
   }
 }
 
-// ── Build user profile object from a full Discord user ────────────────
+// ── Build a plain profile object — no discord.js methods, pure data ───
+// We use our own CDN helpers from presenceParser instead of calling
+// user.bannerURL() / user.displayAvatarURL() so there are no method errors.
 
 function buildUserProfile(user) {
   if (!user) return null;
+
+  const CDN = 'https://cdn.discordapp.com';
+
+  // Avatar URL — handles animated avatars
+  const avatarHash = user.avatar || null;
+  const builtAvatarUrl = avatarHash
+    ? `${CDN}/avatars/${user.id}/${avatarHash}.${avatarHash.startsWith('a_') ? 'gif' : 'png'}?size=256`
+    : `${CDN}/embed/avatars/${Number(BigInt(user.id) >> 22n) % 6}.png`;
+
+  // Banner URL — only present if user has a banner set
+  const bannerHash = user.banner || null;
+  const builtBannerUrl = bannerHash
+    ? `${CDN}/banners/${user.id}/${bannerHash}.${bannerHash.startsWith('a_') ? 'gif' : 'png'}?size=600`
+    : null;
+
+  // Accent / banner color — hex string like "#5865f2"
+  const builtBannerColor = user.hexAccentColor || null;
+
   return {
     id:            user.id,
     username:      user.username,
-    displayName:   user.displayName || user.globalName || user.username,
-    discriminator: user.discriminator !== '0' ? user.discriminator : null,
-    avatar:        user.avatar,
-    avatarUrl:     user.displayAvatarURL({ size: 256 }),
-    // bannerURL() only works on full user objects fetched via REST
-    banner:        user.banner    || null,
-    bannerUrl:     user.banner
-                    ? user.bannerURL({ size: 600 })
-                    : null,
-    bannerColor:   user.hexAccentColor || null,
-    accentColor:   user.accentColor    || null,
+    displayName:   user.globalName || user.displayName || user.username,
+    discriminator: user.discriminator && user.discriminator !== '0' ? user.discriminator : null,
+    avatar:        avatarHash,
+    avatarUrl:     builtAvatarUrl,
+    banner:        bannerHash,
+    bannerUrl:     builtBannerUrl,
+    bannerColor:   builtBannerColor,
+    accentColor:   user.accentColor || null,
     bot:           user.bot  || false,
     createdAt:     user.createdAt?.toISOString() || null,
   };
@@ -89,18 +104,13 @@ async function handlePresenceUpdate(oldPresence, newPresence) {
   try {
     const parsed = parsePresence(newPresence);
 
-    // If the parsed user is missing banner data, enrich with a REST fetch
-    if (parsed.user && !parsed.user.banner) {
-      const fullUser = await fetchFullUser(parsed.userId);
-      if (fullUser) parsed.user = buildUserProfile(fullUser);
-    }
+    // Enrich user profile with REST fetch so banner is always included
+    const fullUser = await fetchFullUser(parsed.userId);
+    if (fullUser) parsed.user = buildUserProfile(fullUser);
 
     await redis.set(PRESENCE_KEY(parsed.userId), parsed, config.redis.ttl);
     await redis.set(PRESENCE_LAST_KEY(parsed.userId), parsed, 60 * 60 * 24 * 7);
-
-    if (parsed.user) {
-      await redis.set(USER_KEY(parsed.userId), parsed.user, config.redis.userTtl);
-    }
+    if (parsed.user) await redis.set(USER_KEY(parsed.userId), parsed.user, config.redis.userTtl);
 
     PresenceSnapshot.create({
       userId:       parsed.userId,
@@ -122,10 +132,9 @@ async function handlePresenceUpdate(oldPresence, newPresence) {
   }
 }
 
-// ── Build offline presence object ─────────────────────────────────────
+// ── Build offline presence ────────────────────────────────────────────
 
 function buildOfflinePresence(userId, fullUser, guildId) {
-  const profile = fullUser ? buildUserProfile(fullUser) : null;
   return {
     userId,
     status:       'offline',
@@ -134,7 +143,7 @@ function buildOfflinePresence(userId, fullUser, guildId) {
       all: [], customStatus: null, spotify: null,
       games: [], streaming: null, watching: null, competing: null,
     },
-    user:      profile,
+    user:      buildUserProfile(fullUser),
     guildId:   guildId || null,
     updatedAt: new Date().toISOString(),
     offline:   true,
@@ -150,22 +159,18 @@ async function getPresence(userId) {
 
   if (!client) return { data: null, source: 'none' };
 
-  // 2. Live fetch — check guilds for presence
+  // 2. Live fetch
   for (const guild of client.guilds.cache.values()) {
     try {
       const member = await guild.members.fetch({ user: userId, force: true }).catch(() => null);
       if (!member) continue;
 
+      // Always do a REST fetch for the full user object (includes banner)
+      const fullUser = await fetchFullUser(userId);
       const presence = member.presence;
 
-      // Always fetch full user via REST so we get banner + accentColor
-      const fullUser = await fetchFullUser(userId);
-
       if (presence && presence.status !== 'offline') {
-        // Online / idle / dnd
         const parsed = parsePresence(presence);
-
-        // Overwrite user with the richer REST-fetched profile
         if (fullUser) parsed.user = buildUserProfile(fullUser);
 
         await redis.set(PRESENCE_KEY(parsed.userId), parsed, config.redis.ttl);
@@ -175,11 +180,11 @@ async function getPresence(userId) {
         return { data: parsed, source: 'live' };
       }
 
-      // Offline / invisible — build from REST-fetched full user
-      const lastKnown  = await redis.get(PRESENCE_LAST_KEY(userId));
+      // Offline / invisible
+      const lastKnown   = await redis.get(PRESENCE_LAST_KEY(userId));
       const offlineData = buildOfflinePresence(userId, fullUser, guild.id);
 
-      // Use last-known user profile if it's richer (e.g. has banner from when they were online)
+      // Prefer last-known user profile if it has a banner and current fetch doesn't
       if (lastKnown?.user?.banner && !offlineData.user?.banner) {
         offlineData.user = lastKnown.user;
       }
@@ -190,7 +195,7 @@ async function getPresence(userId) {
       return { data: offlineData, source: 'live' };
 
     } catch (e) {
-      logger.debug('getPresence guild fetch failed', { guild: guild.id, err: e.message });
+      logger.error('getPresence error', { guild: guild.id, err: e.message, stack: e.stack });
     }
   }
 
@@ -212,7 +217,6 @@ async function getUser(userId) {
 
   if (!client) return { data: null, source: 'none' };
 
-  // Always use REST fetch so banner is included
   const fullUser = await fetchFullUser(userId);
   if (!fullUser) return { data: null, source: 'none' };
 

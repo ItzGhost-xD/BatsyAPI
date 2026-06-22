@@ -27,7 +27,7 @@ async function start() {
     shardCount: config.discord.shardCount,
   });
 
-  client.on('clientReady', () => {
+  client.on('ready', () => {
     logger.info(`Discord bot ready — logged in as ${client.user.tag}`);
     logger.info(`Shard ${config.discord.shardId}/${config.discord.shardCount} — ${client.guilds.cache.size} guilds`);
   });

@@ -176,7 +176,7 @@ function createWsServer(httpServer) {
       type: 'HELLO',
       message: 'Discord Presence WebSocket v1',
       sessionId: ws.id,
-      docs: 'https://github.com/your-org/discord-presence-api#websocket',
+      docs: 'https://github.com/ItzGhost-xD/BatsyAPI#websocket',
     });
 
     ws.on('pong', () => { ws.isAlive = true; });

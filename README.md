@@ -4,6 +4,8 @@
 
 **Production-grade REST + WebSocket API for real-time Discord presence data**
 
+**Developer:** ItzGhost-xD · **Repo:** https://github.com/ItzGhost-xD/BatsyAPI
+
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green?logo=node.js)](https://nodejs.org)
 [![Redis](https://img.shields.io/badge/Redis-7-red?logo=redis)](https://redis.io)
 [![MongoDB](https://img.shields.io/badge/MongoDB-7-green?logo=mongodb)](https://mongodb.com)
@@ -30,7 +32,7 @@ Status badges · Online/Idle/DND/Offline · Spotify · Rich Presence · Games ·
 | **Rate limiting** | Per-IP REST limits + WS connection cap |
 | **Sharding** | Horizontal scaling via `SHARD_ID` / `SHARD_COUNT` |
 | **Docs** | Swagger UI at `/docs` + interactive demo at `/` |
-| **Mock mode** | Works without a real Discord token for dev/testing |
+| **Mock mode** | Works without a real Discord token for dev/testing. Seeded demo users: `111111111111111111`, `222222222222222222`, `333333333333333333` |
 
 ---
 
@@ -39,8 +41,8 @@ Status badges · Online/Idle/DND/Offline · Spotify · Rich Presence · Games ·
 ### Option A — Docker (recommended)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/discord-presence-api.git
-cd discord-presence-api
+git clone https://github.com/ItzGhost-xD/BatsyAPI.git
+cd BatsyAPI
 
 cp .env.example .env
 # Edit .env — set DISCORD_BOT_TOKEN at minimum
@@ -54,8 +56,8 @@ Open **http://localhost:3000/docs** — Swagger UI.
 ### Option B — Local Node.js
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/discord-presence-api.git
-cd discord-presence-api
+git clone https://github.com/ItzGhost-xD/BatsyAPI.git
+cd BatsyAPI
 
 npm install
 cp .env.example .env
@@ -245,10 +247,12 @@ Copy `.env.example` to `.env` and fill in:
 |---|---|---|
 | `DISCORD_BOT_TOKEN` | — | **Required for live data.** From Discord Developer Portal |
 | `PORT` | `3000` | HTTP port |
+| `API_BASE_URL` | `http://localhost:3000` | Base public URL for generated links and docs |
 | `REDIS_URL` | `redis://localhost:6379` | Redis connection string |
 | `REDIS_TTL` | `300` | Presence cache TTL in seconds |
 | `REDIS_USER_TTL` | `3600` | User profile cache TTL in seconds |
 | `MONGODB_URI` | `mongodb://localhost:27017/discord_presence` | MongoDB connection string |
+| `RATE_LIMIT_WINDOW_MS` | `60000` | Rate limit window length, in milliseconds |
 | `RATE_LIMIT_MAX` | `100` | Requests per minute per IP |
 | `WS_RATE_LIMIT_MAX` | `10` | Max WebSocket connections per IP |
 | `API_KEY_REQUIRED` | `false` | Set `true` to enable API key gate |
@@ -293,8 +297,8 @@ Discord Gateway ──► presenceUpdate event ──► Redis cache + pub/sub �
 
 ```bash
 # 1. Clone on your server
-git clone https://github.com/YOUR_USERNAME/discord-presence-api.git
-cd discord-presence-api
+git clone https://github.com/ItzGhost-xD/BatsyAPI.git
+cd BatsyAPI
 
 # 2. Configure
 cp .env.example .env
@@ -305,7 +309,7 @@ docker compose up -d
 
 # 4. Install Nginx + SSL
 sudo apt install nginx certbot python3-certbot-nginx
-sudo certbot --nginx -d your-domain.com
+sudo certbot --nginx -d example.com
 
 # 5. Apply Nginx config
 sudo cp nginx.conf /etc/nginx/sites-available/presence-api
@@ -313,7 +317,7 @@ sudo ln -s /etc/nginx/sites-available/presence-api /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 
 # 6. Check health
-curl https://your-domain.com/health
+curl https://example.com/health
 ```
 
 ### Horizontal scaling
@@ -332,7 +336,7 @@ SHARD_COUNT=3 SHARD_ID=2 PORT=3002 docker compose up -d
 ##  Project Structure
 
 ```
-discord-presence-api/
+BatsyAPI/
 ├── config/
 │   └── index.js              # All env config in one place
 ├── src/
@@ -397,6 +401,21 @@ curl "http://localhost:3000/v1/users/111111111111111111"          # HTML card
 curl "http://localhost:3000/v1/users/111111111111111111?format=json"  # JSON
 curl "http://localhost:3000/v1/users/111111111111111111/status"   # status only
 ```
+
+---
+
+##  Future Improvements
+
+- Add automated tests for routes, WebSocket behavior, and mock data paths.
+- Replace unused or undeclared dependencies with only those the app uses.
+- Add request/response validation using `Joi` or similar schemas for all API endpoints.
+- Add a documented API key signup flow or OAuth integration for public usage.
+- Add metrics dashboards (Prometheus / Grafana) and better logging contexts.
+- Harden security with CSP, stricter CORS policies, and `helmet` defaults enabled.
+- Improve the WebSocket protocol with auth, reconnection guidance, and stats endpoints.
+- Add a Docker healthcheck for Redis / Mongo and a production Dockerfile/service configuration.
+- Add formal docs for deploying to production, HTTPS, and horizontal sharding.
+- Add versioned API support and migration docs for future breaking changes.
 
 ---
 

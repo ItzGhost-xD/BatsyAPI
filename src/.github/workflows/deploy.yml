@@ -1,0 +1,45 @@
+# BatsyAPI — Auto Deploy Workflow
+# Developer : Venom @ Veyron Labs
+# Triggers on push to main, SSHes into Oracle VM and runs deploy script
+
+name: Deploy BatsyAPI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    name: Deploy to Oracle VM
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key:      ${{ secrets.VM_SSH_KEY }}
+          port:     22
+          script: |
+            set -e
+            echo "=== BatsyAPI Deploy — $(date) ==="
+            cd ~/BatsyAPI
+
+            echo "--- Pulling latest code ---"
+            git pull origin main
+
+            echo "--- Installing dependencies ---"
+            npm install --omit=dev
+
+            echo "--- Restarting PM2 ---"
+            pm2 restart batsy-api --update-env || pm2 start src/index.js --name batsy-api
+
+            echo "--- Health check ---"
+            sleep 3
+            curl -sf http://localhost:3000/health && echo " ✅ Healthy" || echo " ⚠️  Health check failed"
+
+            echo "=== Deploy complete ==="

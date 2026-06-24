@@ -1,3 +1,11 @@
+/**
+ * BatsyAPI — Discord Presence API
+ * Developer : Venom
+ * Team      : Veyron Labs
+ * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
+ * License   : MIT © 2024 Veyron Labs
+ */
+
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -59,6 +67,7 @@ function createApp() {
 
   app.use('/v1', v1);
   app.use('/health', healthRouter);
+  app.use('/deploy', deployRouter);
 
   // ── Root — interactive demo page ─────────────────────────────────
   const demoHtml = fs.readFileSync(path.join(__dirname, 'docs/demo.html'), 'utf8');

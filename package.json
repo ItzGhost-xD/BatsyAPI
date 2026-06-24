@@ -1,13 +1,14 @@
 {
-  "name": "discord-presence-api",
+  "name": "batsyapi",
   "version": "1.0.0",
-  "description": "Production-grade Discord Presence API with real-time WebSocket, Redis caching, and rich presence parsing",
+  "description": "BatsyAPI — Discord Presence API by Venom @ Veyron Labs",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "migrate": "node scripts/migrate.js",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "deploy": "git pull origin main && npm install --omit=dev && pm2 restart batsy-api"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -34,5 +35,19 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
-  }
+  },
+  "author": "Venom (Veyron Labs) <https://github.com/ItzGhost-xD>",
+  "license": "MIT",
+  "homepage": "https://github.com/ItzGhost-xD/BatsyAPI",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ItzGhost-xD/BatsyAPI.git"
+  },
+  "keywords": [
+    "discord",
+    "presence",
+    "api",
+    "veyron-labs",
+    "batsyapi"
+  ]
 }

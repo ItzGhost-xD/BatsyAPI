@@ -1,7 +1,7 @@
 {
   "name": "batsyapi",
   "version": "1.0.0",
-  "description": "BatsyAPI — Discord Presence API by Venom @ Veyron Labs",
+  "description": "BatsyAPI — Discord Presence API by Ghost @ Veyron Labs",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -36,7 +36,7 @@
   "devDependencies": {
     "nodemon": "^3.0.2"
   },
-  "author": "Venom (Veyron Labs) <https://github.com/ItzGhost-xD>",
+  "author": "Ghost (Veyron Labs) <https://github.com/ItzGhost-xD>",
   "license": "MIT",
   "homepage": "https://github.com/ItzGhost-xD/BatsyAPI",
   "repository": {

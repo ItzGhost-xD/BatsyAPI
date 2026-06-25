@@ -1,6 +1,6 @@
 /**
  * BatsyAPI — Discord Presence API
- * Developer : Venom
+ * Developer : Ghost
  * Team      : Veyron Labs
  * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
  * License   : MIT © 2024 Veyron Labs

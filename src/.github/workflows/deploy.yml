@@ -1,5 +1,5 @@
 # BatsyAPI — Auto Deploy Workflow
-# Developer : Venom @ Veyron Labs
+# Developer : Ghost @ Veyron Labs
 # Triggers on push to main, SSHes into Oracle VM and runs deploy script
 
 name: Deploy BatsyAPI

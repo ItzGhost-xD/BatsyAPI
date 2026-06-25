@@ -1,803 +1,642 @@
 <!DOCTYPE html>
+<!--
+  BatsyAPI — Discord Presence API Dashboard
+  Developer : Venom
+  Team      : Veyron Labs
+  GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
+  License   : MIT © 2024 Veyron Labs
+-->
 <html lang="en">
 <head>
-<!--
-  ╔══════════════════════════════════════════════════════════════════╗
-  ║                         BatsyAPI                                ║
-  ║              Discord Presence API Dashboard                     ║
-  ║                                                                  ║
-  ║  Developer : Venom                                               ║
-  ║  Team      : Veyron Labs                                         ║
-  ║  GitHub    : https://github.com/ItzGhost-xD/BatsyAPI            ║
-  ║  License   : MIT — Copyright © 2024 Veyron Labs                 ║
-  ║                                                                  ║
-  ║  This project is open source. You're welcome to learn from it.  ║
-  ║  If you use it, credit is appreciated:                           ║
-  ║  "Powered by BatsyAPI — built by Venom @ Veyron Labs"           ║
-  ╚══════════════════════════════════════════════════════════════════╝
--->
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <meta name="author" content="Venom — Veyron Labs"/>
-<meta name="description" content="BatsyAPI — Discord Presence API by Veyron Labs"/>
-<title>BatsyAPI — Discord Presence Dashboard</title>
+<meta name="theme-color" content="#5865F2"/>
+<title>BatsyAPI — Discord Presence</title>
 <style>
-  :root {
-    --bg: #0e1117;
-    --surface: #161b22;
-    --surface2: #1c2330;
-    --border: #30363d;
-    --accent: #5865F2;
-    --accent2: #7289da;
-    --green: #57f287;
-    --yellow: #fee75c;
-    --red: #ed4245;
-    --spotify: #1db954;
-    --text: #e6edf3;
-    --muted: #8b949e;
-    --code-bg: #0d1117;
-    --radius: 10px;
-    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --mono: 'SF Mono', 'Fira Code', monospace;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+:root {
+  --bg:#0e1117; --surface:#161b22; --surface2:#1c2330; --border:#30363d;
+  --accent:#5865F2; --accent2:#7289da; --green:#57f287; --yellow:#fee75c;
+  --red:#ed4245; --spotify:#1db954; --text:#e6edf3; --muted:#8b949e;
+  --code-bg:#0d1117; --r:10px;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'SF Mono','Fira Code',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
 
-  /* ── Header ── */
-  .header {
-    background: linear-gradient(135deg, #1a1f35 0%, #0e1117 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    display: flex; align-items: center; gap: 20px;
-    height: 64px; position: sticky; top: 0; z-index: 100;
-    backdrop-filter: blur(8px);
-  }
-  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-  .logo svg { width: 32px; height: 32px; }
-  .logo-text { font-size: 1.1rem; font-weight: 800; color: var(--text); letter-spacing: -.01em; }
-  .logo-text span { color: var(--accent); }
-  .logo-sub { font-size: 0.65rem; color: var(--muted); margin-top: -2px; letter-spacing: .08em; text-transform: uppercase; }
-  .header-links { display: flex; gap: 8px; margin-left: auto; align-items: center; }
-  .badge {
-    padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
-    border: 1px solid; text-decoration: none; transition: all .15s; cursor: pointer;
-  }
-  .badge-outline { border-color: var(--border); color: var(--muted); background: transparent; }
-  .badge-outline:hover { border-color: var(--accent); color: var(--accent); }
-  .badge-filled { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .badge-filled:hover { background: #4752c4; }
+/* ── Header ── */
+.hdr{
+  background:rgba(14,17,23,.95);border-bottom:1px solid var(--border);
+  padding:0 16px;display:flex;align-items:center;gap:12px;
+  height:56px;position:sticky;top:0;z-index:200;backdrop-filter:blur(12px);
+}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
+.logo svg{width:28px;height:28px}
+.logo-wrap{display:flex;flex-direction:column}
+.logo-name{font-size:1rem;font-weight:800;color:var(--text);letter-spacing:-.01em;line-height:1.1}
+.logo-name span{color:var(--accent)}
+.logo-sub{font-size:.58rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
+.hdr-right{margin-left:auto;display:flex;gap:6px;align-items:center}
+.hdr-btn{
+  padding:5px 11px;border-radius:20px;font-size:.72rem;font-weight:600;
+  border:1px solid var(--border);color:var(--muted);background:transparent;
+  cursor:pointer;text-decoration:none;transition:all .15s;white-space:nowrap;
+}
+.hdr-btn:hover{border-color:var(--accent);color:var(--accent)}
+.hdr-btn.filled{background:var(--accent);border-color:var(--accent);color:#fff}
+.hdr-btn.filled:hover{background:#4752c4}
 
-  /* ── Layout ── */
-  .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
-  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+/* ── Mobile nav ── */
+.mob-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:rgba(22,27,34,.97);border-top:1px solid var(--border);
+  padding:8px 0 env(safe-area-inset-bottom,8px);
+  backdrop-filter:blur(12px);
+}
+.mob-nav-inner{display:flex;justify-content:space-around}
+.mob-tab{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 16px;border-radius:8px;cursor:pointer;
+  color:var(--muted);font-size:.62rem;font-weight:600;border:none;background:none;
+  transition:color .15s;
+}
+.mob-tab.active{color:var(--accent)}
+.mob-tab-icon{font-size:1.3rem;line-height:1}
+@media(max-width:768px){
+  .mob-nav{display:block}
+  .hdr-right .hdr-btn:not(.filled){display:none}
+  body{padding-bottom:72px}
+}
 
-  /* ── Cards ── */
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 20px; transition: border-color .2s;
-  }
-  .card:hover { border-color: #424a57; }
-  .card-title {
-    font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase;
-    letter-spacing: .08em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
-  }
-  .section-title {
-    font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; color: var(--text);
-    display: flex; align-items: center; gap: 8px;
-  }
+/* ── Container ── */
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px}
+@media(max-width:768px){.wrap{padding:16px 12px}}
 
-  /* ── Status dots ── */
-  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
-  .dot-online  { background: var(--green);  box-shadow: 0 0 6px var(--green); }
-  .dot-idle    { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
-  .dot-dnd     { background: var(--red);    box-shadow: 0 0 6px var(--red); }
-  .dot-offline { background: var(--muted); }
-  .dot-pulse   { animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+/* ── Hero ── */
+.hero{text-align:center;padding:36px 0 28px}
+@media(max-width:768px){.hero{padding:24px 0 20px}}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 13px;
+  border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.05em;
+  background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.3);
+  color:var(--accent2);margin-bottom:14px;text-transform:uppercase;
+}
+.hero h1{
+  font-size:clamp(1.8rem,6vw,2.8rem);font-weight:800;line-height:1.15;
+  background:linear-gradient(135deg,#fff 30%,var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{color:var(--muted);margin-top:8px;font-size:clamp(.85rem,2.5vw,1rem);line-height:1.5}
+.hero-credit{margin-top:6px;font-size:.78rem;color:var(--muted)}
+.hero-credit a{color:var(--accent2);text-decoration:none}
+.hero-credit a:hover{text-decoration:underline}
+.hero-pills{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.pill{
+  padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:600;
+  background:rgba(88,101,242,.1);border:1px solid rgba(88,101,242,.2);color:var(--accent2);
+}
+.hero-ctas{display:flex;gap:8px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.btn{
+  padding:9px 18px;border-radius:7px;font-size:.84rem;font-weight:600;
+  cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;
+  text-decoration:none;
+}
+@media(max-width:480px){.btn{padding:8px 14px;font-size:.8rem}}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#4752c4}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
 
-  /* ── Hero ── */
-  .hero { text-align: center; padding: 52px 0 44px; }
-  .hero-eyebrow {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 4px 14px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
-    background: rgba(88,101,242,.12); border: 1px solid rgba(88,101,242,.3);
-    color: var(--accent2); margin-bottom: 18px; letter-spacing: .05em; text-transform: uppercase;
-  }
-  .hero h1 {
-    font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 800;
-    background: linear-gradient(135deg, #fff 30%, var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    line-height: 1.15;
-  }
-  .hero-sub { color: var(--muted); margin-top: 10px; font-size: 1rem; }
-  .hero-credit {
-    margin-top: 8px; font-size: 0.8rem; color: var(--muted);
-  }
-  .hero-credit a { color: var(--accent2); text-decoration: none; }
-  .hero-credit a:hover { text-decoration: underline; }
-  .hero-pills { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
-  .pill {
-    padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
-    background: rgba(88,101,242,.1); border: 1px solid rgba(88,101,242,.25); color: var(--accent2);
-  }
-  .hero-ctas { display: flex; gap: 10px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+/* ── Stats grid ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.stats{grid-template-columns:repeat(2,1fr);gap:8px}}
+.stat{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;transition:border-color .2s,transform .15s;
+}
+.stat:hover{border-color:var(--accent2);transform:translateY(-1px)}
+.stat-lbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.stat-val{font-size:1.6rem;font-weight:800;margin-top:4px;line-height:1}
+@media(max-width:480px){.stat-val{font-size:1.3rem}}
+.stat-sub{font-size:.68rem;color:var(--muted);margin-top:3px}
+.ok{color:var(--green)}.warn{color:var(--yellow)}.err{color:var(--red)}
 
-  /* ── Stat grid ── */
-  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
-  @media (max-width: 768px) { .stat-grid { grid-template-columns: 1fr 1fr; } }
-  .stat-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px 20px;
-    transition: border-color .2s, transform .15s;
-  }
-  .stat-card:hover { border-color: var(--accent2); transform: translateY(-1px); }
-  .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
-  .stat-value { font-size: 1.8rem; font-weight: 800; margin-top: 6px; color: var(--text); }
-  .stat-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
-  .stat-ok   { color: var(--green); }
-  .stat-warn { color: var(--yellow); }
-  .stat-err  { color: var(--red); }
+/* ── Tabs (desktop) ── */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto}
+@media(max-width:768px){.tabs{display:none}}
+.tab{
+  padding:9px 16px;cursor:pointer;font-size:.83rem;font-weight:500;white-space:nowrap;
+  border-bottom:2px solid transparent;color:var(--muted);transition:all .15s;margin-bottom:-1px;
+}
+.tab.active{color:var(--text);border-bottom-color:var(--accent);font-weight:700}
+.tab:hover:not(.active){color:var(--text)}
+.panel{display:none}.panel.active{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 
-  /* ── Tabs ── */
-  .tabs {
-    display: flex; gap: 2px; border-bottom: 1px solid var(--border);
-    margin-bottom: 24px; overflow-x: auto;
-  }
-  .tab {
-    padding: 10px 18px; cursor: pointer; font-size: 0.85rem; font-weight: 500;
-    border-bottom: 2px solid transparent; color: var(--muted); transition: all .15s;
-    margin-bottom: -1px; white-space: nowrap;
-  }
-  .tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
-  .tab:hover:not(.active) { color: var(--text); }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; animation: fadeIn .2s ease; }
+/* ── Grid layouts ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:768px){.g2,.g3{grid-template-columns:1fr}}
 
-  /* ── Presence card ── */
-  .presence-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    overflow: hidden; transition: border-color .2s, transform .2s;
-  }
-  .presence-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
-  .presence-banner {
-    height: 88px; background: linear-gradient(135deg, #5865F2 0%, #7289da 100%);
-    position: relative; background-size: cover; background-position: center;
-  }
-  .presence-avatar-wrap { position: absolute; bottom: -30px; left: 20px; }
-  .presence-avatar {
-    width: 76px; height: 76px; border-radius: 50%;
-    border: 4px solid var(--surface); object-fit: cover; background: var(--surface2);
-    display: block;
-  }
-  .presence-avatar-placeholder {
-    width: 76px; height: 76px; border-radius: 50%;
-    border: 4px solid var(--surface); background: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.8rem; font-weight: 700; color: #fff;
-  }
-  .presence-status-ring {
-    position: absolute; bottom: 3px; right: 3px;
-    width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--surface);
-  }
-  .presence-body { padding: 40px 20px 20px; }
-  .presence-name { font-size: 1.1rem; font-weight: 700; }
-  .presence-username { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
-  .presence-status-row {
-    margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  }
-  .presence-status-pill {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: .05em;
-  }
-  .offline-notice {
-    background: rgba(116,127,141,.1); border: 1px solid rgba(116,127,141,.2);
-    border-radius: 6px; padding: 7px 12px; font-size: 0.75rem; color: var(--muted);
-    margin-top: 10px;
-  }
-  .stale-notice {
-    background: rgba(254,231,92,.08); border: 1px solid rgba(254,231,92,.2);
-    border-radius: 6px; padding: 7px 12px; font-size: 0.75rem; color: var(--yellow);
-    margin-top: 10px;
-  }
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.card-title{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.sec-title{font-size:1rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:7px}
 
-  /* ── Activities ── */
-  .activity-block {
-    margin-top: 12px; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px 12px;
-  }
-  .activity-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 5px; }
-  .activity-name { font-weight: 600; font-size: 0.88rem; }
-  .activity-detail { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+/* ── Input ── */
+.inp{
+  width:100%;background:var(--code-bg);border:1px solid var(--border);color:var(--text);
+  border-radius:6px;padding:9px 12px;font-size:.84rem;outline:none;transition:border-color .15s;
+}
+.inp:focus{border-color:var(--accent)}
+.inp-row{display:flex;gap:8px}
+label{font-size:.76rem;color:var(--muted);margin-bottom:5px;display:block}
 
-  /* ── Spotify ── */
-  .spotify-block {
-    margin-top: 12px; border-radius: 8px; padding: 10px 12px;
-    background: linear-gradient(135deg, rgba(29,185,84,.1) 0%, rgba(29,185,84,.03) 100%);
-    border: 1px solid rgba(29,185,84,.2);
-    display: flex; align-items: center; gap: 12px;
-  }
-  .spotify-art { width: 52px; height: 52px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
-  .spotify-art-placeholder {
-    width: 52px; height: 52px; border-radius: 6px; background: rgba(29,185,84,.2);
-    display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;
-  }
-  .spotify-info { flex: 1; min-width: 0; }
-  .spotify-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--spotify); margin-bottom: 3px; }
-  .spotify-track { font-weight: 700; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .spotify-artist { font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .spotify-album  { font-size: 0.73rem; color: var(--muted); opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 6px; overflow: hidden; }
-  .progress-fill { height: 100%; background: var(--spotify); border-radius: 2px; }
+/* ── Presence card ── */
+.pc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:16px}
+.pc-banner{height:76px;background:linear-gradient(135deg,#5865F266,#7289da44);background-size:cover;background-position:center;position:relative}
+.pc-av-wrap{position:absolute;bottom:-28px;left:16px}
+.pc-av{width:68px;height:68px;border-radius:50%;border:4px solid var(--surface);object-fit:cover;background:var(--surface2);display:block}
+.pc-av-ph{width:68px;height:68px;border-radius:50%;border:4px solid var(--surface);background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;color:#fff}
+.pc-ring{position:absolute;bottom:3px;right:3px;width:18px;height:18px;border-radius:50%;border:3px solid var(--surface)}
+.pc-body{padding:36px 16px 16px}
+.pc-name{font-size:1rem;font-weight:700}
+.pc-user{color:var(--muted);font-size:.8rem;margin-top:1px}
+.pc-status{margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-online{background:var(--green)}.dot-idle{background:var(--yellow)}.dot-dnd{background:var(--red)}.dot-offline{background:var(--muted)}.dot-pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.plat-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.plat-badge{padding:2px 8px;border-radius:4px;font-size:.66rem;font-weight:600;border:1px solid var(--border);color:var(--muted);display:flex;align-items:center;gap:3px}
 
-  /* ── Platform badges ── */
-  .platform-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-  .platform-badge {
-    padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 600;
-    border: 1px solid var(--border); display: flex; align-items: center; gap: 4px; color: var(--muted);
-  }
+/* ── Activity blocks ── */
+.act{margin-top:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.act-lbl{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
+.act-name{font-weight:600;font-size:.86rem}
+.act-detail{font-size:.76rem;color:var(--muted);margin-top:2px}
 
-  /* ── Code ── */
-  .code-block {
-    background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
-    padding: 16px; font-family: var(--mono); font-size: 0.78rem; line-height: 1.7;
-    overflow-x: auto; position: relative;
-  }
-  .code-block pre { white-space: pre-wrap; word-break: break-all; color: #a5d6ff; }
-  .copy-btn {
-    position: absolute; top: 8px; right: 8px; padding: 3px 10px;
-    background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
-    border-radius: 5px; cursor: pointer; font-size: 0.7rem; transition: all .15s;
-  }
-  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+/* ── Spotify ── */
+.sp{margin-top:10px;border-radius:8px;padding:10px 12px;background:linear-gradient(135deg,rgba(29,185,84,.1),rgba(29,185,84,.03));border:1px solid rgba(29,185,84,.2);display:flex;align-items:center;gap:10px}
+.sp-art{width:50px;height:50px;border-radius:6px;object-fit:cover;flex-shrink:0}
+.sp-art-ph{width:50px;height:50px;border-radius:6px;background:rgba(29,185,84,.2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.sp-info{flex:1;min-width:0}
+.sp-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--spotify);margin-bottom:2px}
+.sp-track{font-weight:700;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-sub{font-size:.74rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog{height:3px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
+.prog-fill{height:100%;background:var(--spotify);border-radius:2px}
 
-  /* ── WS terminal ── */
-  .ws-terminal {
-    background: #090d14; border: 1px solid var(--border); border-radius: 8px;
-    height: 320px; overflow-y: auto; padding: 12px;
-    font-family: var(--mono); font-size: 0.75rem; line-height: 1.65;
-  }
-  .ws-line.in  { color: #79c0ff; }
-  .ws-line.out { color: #56d364; }
-  .ws-line.sys { color: var(--muted); }
-  .ws-line.err { color: var(--red); }
-  .ws-line.upd { color: var(--yellow); }
+/* ── Code ── */
+.code{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:var(--mono);font-size:.76rem;line-height:1.7;overflow-x:auto;position:relative}
+.code pre{white-space:pre-wrap;word-break:break-all;color:#a5d6ff}
+.copy-btn{position:absolute;top:7px;right:7px;padding:3px 9px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:5px;cursor:pointer;font-size:.68rem;transition:all .15s}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
 
-  /* ── Buttons ── */
-  .btn {
-    padding: 8px 16px; border-radius: 6px; font-size: 0.83rem; font-weight: 600;
-    cursor: pointer; border: none; transition: all .15s; display: inline-flex; align-items: center; gap: 6px;
-  }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: #4752c4; }
-  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-danger { background: var(--red); color: #fff; }
-  .btn-success { background: #2ea043; color: #fff; }
-  .btn:disabled { opacity: .4; cursor: not-allowed; }
+/* ── WS ── */
+.ws-term{background:#090d14;border:1px solid var(--border);border-radius:8px;height:260px;overflow-y:auto;padding:10px;font-family:var(--mono);font-size:.73rem;line-height:1.6}
+@media(max-width:768px){.ws-term{height:200px}}
+.wl.in{color:#79c0ff}.wl.out{color:#56d364}.wl.sys{color:var(--muted)}.wl.err{color:var(--red)}.wl.upd{color:var(--yellow)}
 
-  /* ── Inputs ── */
-  .input {
-    width: 100%; background: var(--code-bg); border: 1px solid var(--border); color: var(--text);
-    border-radius: 6px; padding: 9px 12px; font-size: 0.84rem; outline: none; transition: border-color .15s;
-  }
-  .input:focus { border-color: var(--accent); }
-  .input-row { display: flex; gap: 8px; }
-  label { font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; display: block; }
+/* ── Table ── */
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl th{text-align:left;padding:8px 12px;color:var(--muted);font-weight:700;font-size:.67rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+.tbl td{padding:9px 12px;border-bottom:1px solid #1a2030;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+@media(max-width:600px){.tbl .hide-mob{display:none}}
 
-  /* ── Table ── */
-  .table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
-  .table th {
-    text-align: left; padding: 8px 14px; color: var(--muted); font-weight: 700;
-    font-size: 0.7rem; text-transform: uppercase; letter-spacing: .06em;
-    border-bottom: 1px solid var(--border);
-  }
-  .table td { padding: 10px 14px; border-bottom: 1px solid #1a2030; vertical-align: middle; }
-  .table tr:last-child td { border-bottom: none; }
-  .table tr:hover td { background: rgba(255,255,255,.02); }
+/* ── Notices ── */
+.notice-warn{background:rgba(254,231,92,.07);border:1px solid rgba(254,231,92,.2);border-radius:6px;padding:7px 12px;font-size:.74rem;color:var(--yellow);margin-top:8px}
+.notice-off{background:rgba(116,127,141,.07);border:1px solid rgba(116,127,141,.2);border-radius:6px;padding:7px 12px;font-size:.74rem;color:var(--muted);margin-top:8px}
 
-  /* ── Misc ── */
-  .divider { height: 1px; background: var(--border); margin: 32px 0; }
-  .fade-in { animation: fadeIn .25s ease; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+/* ── About cards ── */
+.about-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.about-row:last-child{border-bottom:none}
+.about-lbl{color:var(--muted)}
+.about-val{font-weight:600}
 
-  /* ── Footer ── */
-  .footer {
-    border-top: 1px solid var(--border); padding: 24px 32px;
-    text-align: center; font-size: 0.78rem; color: var(--muted); margin-top: 60px;
-  }
-  .footer a { color: var(--accent2); text-decoration: none; }
-  .footer a:hover { text-decoration: underline; }
-  .footer strong { color: var(--text); }
+/* ── Divider ── */
+.div{height:1px;background:var(--border);margin:24px 0}
+
+/* ── Footer ── */
+.footer{border-top:1px solid var(--border);padding:20px 16px;text-align:center;font-size:.74rem;color:var(--muted);margin-top:40px}
+.footer a{color:var(--accent2);text-decoration:none}.footer a:hover{text-decoration:underline}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 </style>
 </head>
 <body>
 
 <!-- Header -->
-<header class="header">
+<header class="hdr">
   <a class="logo" href="/">
     <svg viewBox="0 0 71 55" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.9a.2.2 0 0 0-.2.1 40.7 40.7 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0A37.5 37.5 0 0 0 25.5 1a.2.2 0 0 0-.2-.1A58.3 58.3 0 0 0 10.7 4.9C10.6 4.9 10.6 5 10.5 5 1.5 18.7-1 32 .3 45.1l.1.2A58.8 58.8 0 0 0 18 54.6a.2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4l1.1-.8a.2.2 0 0 1 .2 0c11.5 5.3 24 5.3 35.4 0a.2.2 0 0 1 .2 0l1.1.9a.2.2 0 0 1 0 .4 36 36 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.6-9.4l.1-.2c1.5-15.3-2.5-28.5-10.5-40.2-.1 0-.1-.1-.2-.1ZM23.7 37.3c-3.5 0-6.4-3.2-6.4-7.1s2.8-7.1 6.4-7.1c3.6 0 6.5 3.2 6.4 7.1 0 3.9-2.8 7.1-6.4 7.1Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.1s2.9-7.1 6.4-7.1c3.6 0 6.5 3.2 6.4 7.1 0 3.9-2.8 7.1-6.4 7.1Z" fill="#5865F2"/>
     </svg>
-    <div>
-      <div class="logo-text">Batsy<span>API</span></div>
-      <div class="logo-sub">by Veyron Labs</div>
+    <div class="logo-wrap">
+      <div class="logo-name">Batsy<span>API</span></div>
+      <div class="logo-sub">Veyron Labs</div>
     </div>
   </a>
-  <nav class="header-links">
-    <a class="badge badge-outline" href="#try" onclick="showTab('try',event)">Try It</a>
-    <a class="badge badge-outline" href="#websocket" onclick="showTab('websocket',event)">WebSocket</a>
-    <a class="badge badge-outline" href="#endpoints" onclick="showTab('endpoints',event)">Endpoints</a>
-    <a class="badge badge-filled" href="/docs" target="_blank">Swagger Docs ↗</a>
-  </nav>
+  <div class="hdr-right">
+    <a class="hdr-btn" href="#" onclick="showTab('try',event)">Try It</a>
+    <a class="hdr-btn" href="#" onclick="showTab('endpoints',event)">Endpoints</a>
+    <a class="hdr-btn filled" href="/docs" target="_blank">Docs ↗</a>
+  </div>
 </header>
 
-<div class="container">
+<!-- Main content -->
+<div class="wrap">
 
   <!-- Hero -->
   <div class="hero">
-    <div class="hero-eyebrow">⚡ Veyron Labs — Discord Presence API</div>
+    <div class="hero-badge">⚡ Veyron Labs — Real-time Presence API</div>
     <h1>BatsyAPI</h1>
-    <p class="hero-sub">Real-time Discord presence tracking — status, Spotify, games, rich presence &amp; more</p>
+    <p class="hero-sub">Discord presence tracking — status, Spotify, games, rich presence &amp; more</p>
     <p class="hero-credit">
-      Built by <strong>Venom</strong> ·
+      by <strong>Venom</strong> ·
       <a href="https://github.com/ItzGhost-xD/BatsyAPI" target="_blank">GitHub ↗</a> ·
       <a href="/docs" target="_blank">API Docs ↗</a>
     </p>
     <div class="hero-pills">
-      <span class="pill">✓ Gateway Connected</span>
-      <span class="pill">✓ Redis Cache</span>
+      <span class="pill">✓ Gateway</span>
+      <span class="pill">✓ Redis</span>
       <span class="pill">✓ WebSocket</span>
       <span class="pill">✓ MongoDB</span>
-      <span class="pill">✓ ETag / Cache-Control</span>
-      <span class="pill">✓ Rate Limited</span>
+      <span class="pill">✓ ETag</span>
       <span class="pill">✓ Docker</span>
-      <span class="pill">✓ OpenAPI / Swagger</span>
+      <span class="pill">✓ Swagger</span>
     </div>
     <div class="hero-ctas">
-      <button class="btn btn-primary" onclick="showTab('try',event)">🔍 Try the API</button>
-      <button class="btn btn-ghost" onclick="showTab('websocket',event)">🔌 WebSocket Demo</button>
-      <a class="btn btn-ghost" href="/docs" target="_blank">📖 Swagger Docs</a>
+      <button class="btn btn-primary" onclick="showTab('try',event)">🔍 Try It</button>
+      <button class="btn btn-ghost"   onclick="showTab('websocket',event)">🔌 WebSocket</button>
+      <a      class="btn btn-ghost"   href="/docs" target="_blank">📖 Docs</a>
     </div>
   </div>
 
-  <!-- Live stats -->
-  <div class="stat-grid">
-    <div class="stat-card">
-      <div class="stat-label">API Status</div>
-      <div class="stat-value" id="stat-status">—</div>
-      <div class="stat-sub" id="stat-status-sub">checking...</div>
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-lbl">API Status</div>
+      <div class="stat-val" id="s-status">—</div>
+      <div class="stat-sub" id="s-status-s">checking...</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Redis</div>
-      <div class="stat-value" id="stat-redis">—</div>
-      <div class="stat-sub" id="stat-redis-sub">cache layer</div>
+    <div class="stat">
+      <div class="stat-lbl">Total Requests</div>
+      <div class="stat-val" id="s-reqs">—</div>
+      <div class="stat-sub">all time</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">MongoDB</div>
-      <div class="stat-value" id="stat-mongo">—</div>
-      <div class="stat-sub">analytics db</div>
+    <div class="stat">
+      <div class="stat-lbl">Users Tracked</div>
+      <div class="stat-val" id="s-users">—</div>
+      <div class="stat-sub">unique IDs</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Discord Bot</div>
-      <div class="stat-value" id="stat-discord">—</div>
-      <div class="stat-sub" id="stat-discord-sub">gateway</div>
+    <div class="stat">
+      <div class="stat-lbl">Redis</div>
+      <div class="stat-val" id="s-redis">—</div>
+      <div class="stat-sub" id="s-redis-s">cache layer</div>
     </div>
   </div>
 
-  <div class="divider"></div>
+  <div class="div"></div>
 
-  <!-- Tabs -->
-  <div class="tabs" id="main-tabs">
+  <!-- Desktop tabs -->
+  <div class="tabs" id="desk-tabs">
     <div class="tab active" data-tab="try"       onclick="showTab('try',event)">🔍 Try It</div>
     <div class="tab"        data-tab="websocket" onclick="showTab('websocket',event)">🔌 WebSocket</div>
     <div class="tab"        data-tab="endpoints" onclick="showTab('endpoints',event)">📋 Endpoints</div>
-    <div class="tab"        data-tab="deploy"    onclick="showTab('deploy',event)">🚀 Deploy</div>
     <div class="tab"        data-tab="about"     onclick="showTab('about',event)">ℹ️ About</div>
   </div>
 
-  <!-- ── TAB: Try It ── -->
-  <div class="tab-panel active" id="tab-try">
-    <div class="grid-2" style="align-items:start;">
+  <!-- ── TRY IT ── -->
+  <div class="panel active" id="panel-try">
+    <div class="g2">
       <div>
-        <div class="section-title">🔍 Lookup User Presence</div>
-        <label>Discord User ID (snowflake)</label>
-        <div class="input-row" style="margin-bottom:8px;">
-          <input class="input" id="user-id-input" placeholder="e.g. 839956251336245278" type="text"/>
-          <button class="btn btn-primary" id="fetch-btn" onclick="fetchPresence()">Fetch</button>
+        <div class="sec-title">🔍 Lookup Presence</div>
+        <label>Discord User ID</label>
+        <div class="inp-row" style="margin-bottom:8px">
+          <input class="inp" id="uid" placeholder="e.g. 839956251336245278" type="text"/>
+          <button class="btn btn-primary" id="fetch-btn" onclick="doFetch()">Fetch</button>
         </div>
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
-          <label style="margin:0;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;">
-            <input type="checkbox" id="use-etag" checked/>
-            <span style="color:var(--muted)">ETag demo (304)</span>
+        <div style="display:flex;gap:14px;margin-bottom:4px">
+          <label style="margin:0;display:flex;align-items:center;gap:5px;cursor:pointer;font-size:.76rem">
+            <input type="checkbox" id="use-etag" checked/><span style="color:var(--muted)">ETag demo</span>
           </label>
-          <label style="margin:0;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;">
-            <input type="checkbox" id="show-html"/>
-            <span style="color:var(--muted)">Open HTML card</span>
+          <label style="margin:0;display:flex;align-items:center;gap:5px;cursor:pointer;font-size:.76rem">
+            <input type="checkbox" id="open-html"/><span style="color:var(--muted)">HTML card</span>
           </label>
         </div>
-        <div id="presence-display"></div>
+        <div id="pc-wrap"></div>
       </div>
       <div>
-        <div class="section-title">📦 Raw JSON Response</div>
-        <div style="position:relative;">
-          <div class="code-block" id="json-output" style="min-height:140px;max-height:500px;overflow-y:auto;">
-            <pre id="json-pre" style="color:var(--muted);">// Response will appear here</pre>
+        <div class="sec-title">📦 JSON Response</div>
+        <div style="position:relative">
+          <div class="code" id="json-out" style="min-height:120px;max-height:440px;overflow-y:auto">
+            <pre id="json-pre" style="color:var(--muted)">// Response appears here</pre>
           </div>
           <button class="copy-btn" onclick="copyJson()">Copy</button>
         </div>
-        <div id="response-meta" style="margin-top:8px;font-size:.72rem;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;"></div>
+        <div id="res-meta" style="margin-top:7px;font-size:.7rem;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap"></div>
       </div>
     </div>
   </div>
 
-  <!-- ── TAB: WebSocket ── -->
-  <div class="tab-panel" id="tab-websocket">
-    <div class="section-title">🔌 Live WebSocket Feed</div>
-    <div class="grid-2" style="align-items:start;">
-      <div style="display:flex;flex-direction:column;gap:14px;">
+  <!-- ── WEBSOCKET ── -->
+  <div class="panel" id="panel-websocket">
+    <div class="sec-title">🔌 Live WebSocket Feed</div>
+    <div class="g2">
+      <div style="display:flex;flex-direction:column;gap:12px">
         <div class="card">
           <div class="card-title">Connection</div>
-          <div class="input-row">
-            <input class="input" id="ws-url" value="" placeholder="ws://localhost:3000/ws"/>
-            <button class="btn btn-success" id="ws-connect-btn" onclick="wsConnect()">Connect</button>
+          <div class="inp-row">
+            <input class="inp" id="ws-url" placeholder="ws://localhost:3000/ws"/>
+            <button class="btn btn-primary" id="ws-btn" onclick="wsConnect()">Connect</button>
           </div>
         </div>
         <div class="card">
           <div class="card-title">Subscribe to User</div>
-          <div class="input-row">
-            <input class="input" id="ws-user-id" placeholder="Discord User ID"/>
-            <button class="btn btn-primary" onclick="wsSubscribe()">Subscribe</button>
+          <div class="inp-row">
+            <input class="inp" id="ws-uid" placeholder="Discord User ID"/>
+            <button class="btn btn-primary" onclick="wsSub()">Sub</button>
           </div>
         </div>
         <div class="card">
-          <div class="card-title">Quick Actions</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-ghost" style="font-size:.75rem;padding:5px 10px;" onclick="wsSendMsg({type:'PING'})">PING</button>
-            <button class="btn btn-ghost" style="font-size:.75rem;padding:5px 10px;" onclick="wsSendMsg({type:'SUBSCRIBE_BULK',userIds:[]})">Bulk Sub</button>
-            <button class="btn btn-danger" style="font-size:.75rem;padding:5px 10px;" onclick="wsDisconnect()">Disconnect</button>
+          <div class="card-title">Quick Commands</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <button class="btn btn-ghost" style="font-size:.74rem;padding:5px 10px" onclick="wsSend({type:'PING'})">PING</button>
+            <button class="btn btn-ghost" style="font-size:.74rem;padding:5px 10px" onclick="wsSend({type:'FETCH',userId:document.getElementById('ws-uid').value})">FETCH</button>
+            <button class="btn" style="background:var(--red);color:#fff;font-size:.74rem;padding:5px 10px" onclick="wsDisc()">Disconnect</button>
           </div>
         </div>
         <div>
-          <label>Send Custom JSON</label>
-          <div class="input-row">
-            <input class="input" id="ws-custom" placeholder='{"type":"PING"}' style="font-family:var(--mono);font-size:.8rem;"/>
+          <label>Custom JSON</label>
+          <div class="inp-row">
+            <input class="inp" id="ws-custom" placeholder='{"type":"PING"}' style="font-family:var(--mono);font-size:.78rem"/>
             <button class="btn btn-ghost" onclick="wsSendCustom()">Send</button>
           </div>
         </div>
-        <div id="ws-live-cards"></div>
+        <div id="ws-cards"></div>
       </div>
       <div>
-        <div class="card-title" style="margin-bottom:8px;">Live Messages</div>
-        <div class="ws-terminal" id="ws-terminal">
-          <div class="ws-line sys">// Click Connect to start</div>
-        </div>
+        <div class="card-title" style="margin-bottom:7px">Live Messages</div>
+        <div class="ws-term" id="ws-term"><div class="wl sys">// Connect to start</div></div>
       </div>
     </div>
   </div>
 
-  <!-- ── TAB: Endpoints ── -->
-  <div class="tab-panel" id="tab-endpoints">
-    <div class="section-title">📋 REST Endpoints</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:28px;">
-      <table class="table">
-        <thead><tr><th>Method</th><th>Path</th><th>Description</th><th>Cache</th><th></th></tr></thead>
-        <tbody id="ep-table"></tbody>
+  <!-- ── ENDPOINTS ── -->
+  <div class="panel" id="panel-endpoints">
+    <div class="sec-title">📋 REST Endpoints</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:24px">
+      <table class="tbl">
+        <thead><tr><th>Method</th><th>Path</th><th>Description</th><th class="hide-mob">Cache</th><th></th></tr></thead>
+        <tbody id="ep-body"></tbody>
       </table>
     </div>
-    <div class="section-title">🔌 WebSocket Protocol</div>
-    <div class="grid-2">
+    <div class="sec-title">🔌 WebSocket Protocol</div>
+    <div class="g2">
       <div>
-        <div class="card-title" style="margin-bottom:8px;">Messages you send</div>
-        <div class="code-block"><pre style="color:#86efac;">{ "type": "SUBSCRIBE",      "userId": "123..." }
+        <div class="card-title" style="margin-bottom:7px">Send</div>
+        <div class="code"><pre style="color:#86efac">{ "type": "SUBSCRIBE",      "userId": "123..." }
 { "type": "SUBSCRIBE_BULK", "userIds": ["1","2"] }
 { "type": "UNSUBSCRIBE",    "userId": "123..." }
 { "type": "FETCH",          "userId": "123..." }
 { "type": "PING" }</pre></div>
       </div>
       <div>
-        <div class="card-title" style="margin-bottom:8px;">Messages you receive</div>
-        <div class="code-block"><pre style="color:#7dd3fc;">{ "type": "HELLO",           "sessionId": "uuid" }
+        <div class="card-title" style="margin-bottom:7px">Receive</div>
+        <div class="code"><pre style="color:#7dd3fc">{ "type": "HELLO",           "sessionId": "uuid" }
 { "type": "SUBSCRIBED",      "userId": "...", "current": {...} }
 { "type": "PRESENCE_UPDATE", "userId": "...", "data": {...} }
-{ "type": "FETCH_RESULT",    "userId": "...", "data": {...} }
 { "type": "PONG",            "ts": 1700000000 }
-{ "type": "ERROR",           "code": 4001, "message": "..." }</pre></div>
+{ "type": "ERROR",           "code": 4001 }</pre></div>
       </div>
     </div>
   </div>
 
-  <!-- ── TAB: Deploy ── -->
-  <div class="tab-panel" id="tab-deploy">
-    <div class="section-title">🚀 Deploy Guide</div>
-    <div class="grid-2" style="align-items:start;">
-      <div style="display:flex;flex-direction:column;gap:20px;">
-        <div>
-          <div class="card-title" style="margin-bottom:8px;">1 — Clone &amp; configure</div>
-          <div class="code-block"><pre>git clone https://github.com/ItzGhost-xD/BatsyAPI
-cd BatsyAPI
-cp .env.example .env
-# Fill in DISCORD_BOT_TOKEN, ETAG_SECRET, MONGODB_URI</pre></div>
+  <!-- ── ABOUT ── -->
+  <div class="panel" id="panel-about">
+    <div class="sec-title">ℹ️ About BatsyAPI</div>
+    <div class="g2">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="card">
+          <div class="card-title">Project Info</div>
+          <div class="about-row"><span class="about-lbl">Name</span><span class="about-val">BatsyAPI</span></div>
+          <div class="about-row"><span class="about-lbl">Developer</span><span class="about-val">Venom</span></div>
+          <div class="about-row"><span class="about-lbl">Team</span><span class="about-val" style="color:var(--accent2)">Veyron Labs</span></div>
+          <div class="about-row"><span class="about-lbl">Version</span><span class="about-val">v1.0.0</span></div>
+          <div class="about-row"><span class="about-lbl">License</span><span class="about-val">MIT</span></div>
+          <div class="about-row">
+            <span class="about-lbl">GitHub</span>
+            <a href="https://github.com/ItzGhost-xD/BatsyAPI" target="_blank" style="color:var(--accent2);font-size:.82rem;font-weight:600;text-decoration:none">ItzGhost-xD/BatsyAPI ↗</a>
+          </div>
         </div>
-        <div>
-          <div class="card-title" style="margin-bottom:8px;">2 — Docker (easiest)</div>
-          <div class="code-block"><pre>docker compose up -d
-# Open http://localhost:3000</pre></div>
+        <div class="card">
+          <div class="card-title">Bot Commands</div>
+          <div style="font-size:.8rem;line-height:2;color:var(--muted)">
+            <div><code style="color:var(--accent2)">@Batsy help</code> — show this info</div>
+            <div><code style="color:var(--accent2)">@Batsy presence &lt;id&gt;</code> — look up a user</div>
+            <div><code style="color:var(--accent2)">@Batsy ping</code> — check bot latency</div>
+            <div><code style="color:var(--accent2)">@Batsy stats</code> — API usage stats</div>
+          </div>
         </div>
-        <div>
-          <div class="card-title" style="margin-bottom:8px;">3 — VPS with PM2</div>
-          <div class="code-block"><pre>npm install
-npm install -g pm2
-pm2 start src/index.js --name batsy-api
-pm2 save && pm2 startup</pre></div>
-        </div>
-        <div>
-          <div class="card-title" style="margin-bottom:8px;">4 — Auto-deploy from GitHub</div>
-          <div class="code-block"><pre># On your server — run once:
-cd ~/BatsyAPI
-cat > deploy.sh << 'EOF'
-#!/bin/bash
-git pull origin main
-npm install --omit=dev
-pm2 restart batsy-api
-EOF
-chmod +x deploy.sh
-
-# Then on GitHub → Settings → Webhooks:
-# Payload URL: https://api.yourdomain.com/deploy
-# (or use GitHub Actions — see README)</pre></div>
+        <div class="card">
+          <div class="card-title">Attribution</div>
+          <p style="font-size:.8rem;line-height:1.7;color:var(--muted)">
+            BatsyAPI is open source (MIT). If you use it, credit is appreciated:
+          </p>
+          <div class="code" style="margin-top:10px">
+            <pre style="color:#86efac">Powered by BatsyAPI
+Built by Venom @ Veyron Labs
+github.com/ItzGhost-xD/BatsyAPI</pre>
+          </div>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:20px;">
+      <div style="display:flex;flex-direction:column;gap:14px">
         <div class="card">
-          <div class="card-title">Discord Bot Setup</div>
-          <ol style="padding-left:18px;line-height:2.2;font-size:.83rem;color:var(--muted);">
-            <li>Go to <strong style="color:var(--text)">discord.com/developers/applications</strong></li>
-            <li>New Application → Bot → copy token</li>
-            <li>Enable Privileged Intents:<br>
-              <code style="color:var(--accent)">GUILD_MEMBERS</code> +
-              <code style="color:var(--accent)">GUILD_PRESENCES</code>
-            </li>
-            <li>Invite with <code style="color:var(--accent)">bot</code> scope, 0 permissions</li>
-            <li>Paste token in <code style="color:var(--accent)">.env</code></li>
+          <div class="card-title">How to Use</div>
+          <ol style="padding-left:18px;line-height:2.2;font-size:.82rem;color:var(--muted)">
+            <li>Enable <strong style="color:var(--text)">Developer Mode</strong> in Discord Settings → Advanced</li>
+            <li>Right-click yourself → <strong style="color:var(--text)">Copy User ID</strong></li>
+            <li>Open <code style="color:var(--accent2)">/v1/users/YOUR_ID</code> in browser</li>
+            <li>Add <code style="color:var(--accent2)">?format=json</code> for JSON output</li>
+            <li>Or use the <strong style="color:var(--text)">Try It</strong> tab above</li>
           </ol>
         </div>
         <div class="card">
-          <div class="card-title">Architecture</div>
-          <pre style="font-family:var(--mono);font-size:.72rem;line-height:1.9;color:var(--muted);white-space:pre-wrap;">Discord Gateway (WSS)
-       │ presenceUpdate
-       ▼
-  discord.js Client
-       │ parsePresence()
-       ├──▶ Redis (cache + pub/sub)
-       ├──▶ MongoDB (snapshots)
-       └──▶ WebSocket fan-out
-                │
-         ┌──────┴──────┐
-         ▼             ▼
-   REST /v1/      WS /ws
-   users/:id    subscribers</pre>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TAB: About ── -->
-  <div class="tab-panel" id="tab-about">
-    <div class="section-title">ℹ️ About BatsyAPI</div>
-    <div class="grid-2" style="align-items:start;">
-      <div style="display:flex;flex-direction:column;gap:16px;">
-        <div class="card">
-          <div class="card-title">Project</div>
-          <table style="width:100%;font-size:.84rem;border-collapse:collapse;">
-            <tr><td style="color:var(--muted);padding:5px 0;width:110px;">Name</td><td style="font-weight:600;">BatsyAPI</td></tr>
-            <tr><td style="color:var(--muted);padding:5px 0;">Developer</td><td style="font-weight:600;">Venom</td></tr>
-            <tr><td style="color:var(--muted);padding:5px 0;">Team</td><td style="font-weight:600;color:var(--accent2);">Veyron Labs</td></tr>
-            <tr><td style="color:var(--muted);padding:5px 0;">Version</td><td style="font-weight:600;">v1.0.0</td></tr>
-            <tr><td style="color:var(--muted);padding:5px 0;">License</td><td style="font-weight:600;">MIT</td></tr>
-            <tr><td style="color:var(--muted);padding:5px 0;">GitHub</td>
-              <td><a href="https://github.com/ItzGhost-xD/BatsyAPI" target="_blank" style="color:var(--accent2);text-decoration:none;">ItzGhost-xD/BatsyAPI ↗</a></td>
-            </tr>
-          </table>
+          <div class="card-title">Live Health</div>
+          <div id="health-detail" style="font-size:.8rem;color:var(--muted)">Loading...</div>
+          <button class="btn btn-ghost" style="margin-top:10px;font-size:.76rem" onclick="loadHealth()">Refresh</button>
         </div>
         <div class="card">
           <div class="card-title">Tech Stack</div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
-            <span class="pill">Node.js 20</span>
-            <span class="pill">Express</span>
-            <span class="pill">discord.js 14</span>
-            <span class="pill">Redis 7</span>
-            <span class="pill">MongoDB / Atlas</span>
-            <span class="pill">WebSocket</span>
-            <span class="pill">Docker</span>
-            <span class="pill">Nginx</span>
-            <span class="pill">Cloudflare</span>
-            <span class="pill">PM2</span>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+            <span class="pill">Node.js 20</span><span class="pill">discord.js 14</span>
+            <span class="pill">Redis 7</span><span class="pill">MongoDB</span>
+            <span class="pill">WebSocket</span><span class="pill">Docker</span>
+            <span class="pill">Nginx</span><span class="pill">Cloudflare</span>
           </div>
-        </div>
-        <div class="card">
-          <div class="card-title">Features</div>
-          <ul style="font-size:.83rem;line-height:2.1;padding-left:18px;color:var(--muted);">
-            <li><strong style="color:var(--text)">Full presence parsing</strong> — online, idle, DND, offline, invisible</li>
-            <li><strong style="color:var(--text)">Platform detection</strong> — desktop, mobile, web</li>
-            <li><strong style="color:var(--text)">Spotify</strong> — track, artist, album art, progress</li>
-            <li><strong style="color:var(--text)">Rich Presence</strong> — games, VS Code, streaming</li>
-            <li><strong style="color:var(--text)">Custom status</strong> — emoji + text</li>
-            <li><strong style="color:var(--text)">Offline users</strong> — last known state preserved</li>
-            <li><strong style="color:var(--text)">Redis cache</strong> — ETag, Cache-Control, X-Cache</li>
-            <li><strong style="color:var(--text)">WebSocket</strong> — real-time subscriptions</li>
-            <li><strong style="color:var(--text)">HTML cards</strong> — embeddable presence card</li>
-            <li><strong style="color:var(--text)">MongoDB analytics</strong> — 30-day history</li>
-          </ul>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:16px;">
-        <div class="card">
-          <div class="card-title">Usage &amp; Attribution</div>
-          <p style="font-size:.83rem;line-height:1.8;color:var(--muted);">
-            BatsyAPI is open source under the MIT license. You're welcome to use it, fork it, and learn from it.
-            <br><br>
-            If you use this in your own project, a credit is appreciated:
-          </p>
-          <div class="code-block" style="margin-top:12px;">
-            <pre style="color:#86efac;">Powered by BatsyAPI
-Built by Venom @ Veyron Labs
-https://github.com/ItzGhost-xD/BatsyAPI</pre>
-          </div>
-          <p style="font-size:.78rem;color:var(--muted);margin-top:10px;">
-            Copyright © 2024 Veyron Labs. All rights reserved.
-          </p>
-        </div>
-        <div class="card">
-          <div class="card-title">Live Health Check</div>
-          <div id="health-detail" style="font-size:.82rem;color:var(--muted);">Loading...</div>
-          <button class="btn btn-ghost" style="margin-top:12px;font-size:.78rem;" onclick="loadHealth()">Refresh</button>
         </div>
       </div>
     </div>
   </div>
 
-</div><!-- /container -->
+</div><!-- /wrap -->
 
 <!-- Footer -->
 <footer class="footer">
-  <strong>BatsyAPI</strong> — Discord Presence API ·
-  Built by <strong>Venom</strong> @ <strong>Veyron Labs</strong> ·
+  <strong>BatsyAPI</strong> — built by <strong>Venom</strong> @ <strong>Veyron Labs</strong> ·
   <a href="https://github.com/ItzGhost-xD/BatsyAPI" target="_blank">GitHub ↗</a> ·
-  <a href="/docs" target="_blank">API Docs ↗</a> ·
-  <a href="/health">Health ↗</a>
-  <br><br>
-  <span style="font-size:.7rem;">Copyright © 2024 Veyron Labs · MIT License</span>
+  <a href="/docs" target="_blank">Swagger ↗</a> ·
+  <a href="/health">Health ↗</a><br>
+  <span style="font-size:.68rem">MIT © 2024 Veyron Labs</span>
 </footer>
+
+<!-- Mobile bottom nav -->
+<nav class="mob-nav">
+  <div class="mob-nav-inner">
+    <button class="mob-tab active" data-tab="try"       onclick="showTab('try',event)">
+      <span class="mob-tab-icon">🔍</span>Try
+    </button>
+    <button class="mob-tab"        data-tab="websocket" onclick="showTab('websocket',event)">
+      <span class="mob-tab-icon">🔌</span>WS
+    </button>
+    <button class="mob-tab"        data-tab="endpoints" onclick="showTab('endpoints',event)">
+      <span class="mob-tab-icon">📋</span>Endpoints
+    </button>
+    <button class="mob-tab"        data-tab="about"     onclick="showTab('about',event)">
+      <span class="mob-tab-icon">ℹ️</span>About
+    </button>
+  </div>
+</nav>
 
 <script>
 /*
- * BatsyAPI Dashboard — Client Script
- * Developer : Venom
- * Team      : Veyron Labs
+ * BatsyAPI Dashboard Script
+ * Developer : Venom @ Veyron Labs
  * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
- * License   : MIT © 2024 Veyron Labs
  */
 
-// ── Set WS URL based on current host ────────────────────────────────
+// ── Set WS URL from current host ─────────────────────────────────────
 (function(){
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  document.getElementById('ws-url').value = `${proto}://${location.host}/ws`;
+  const p = location.protocol === 'https:' ? 'wss' : 'ws';
+  const wsEl = document.getElementById('ws-url');
+  if (wsEl) wsEl.value = `${p}://${location.host}/ws`;
 })();
 
-// ── Tabs ─────────────────────────────────────────────────────────────
+// ── Tab switching ─────────────────────────────────────────────────────
 function showTab(name, e) {
   if (e) e.preventDefault();
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + name)?.classList.add('active');
-  document.querySelector(`.tab[data-tab="${name}"]`)?.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab, .mob-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name)?.classList.add('active');
+  document.querySelectorAll(`[data-tab="${name}"]`).forEach(t => t.classList.add('active'));
 }
 
-// ── Constants ─────────────────────────────────────────────────────────
-const STATUS_COLOR = {online:'#57f287',idle:'#fee75c',dnd:'#ed4245',offline:'#747f8d',invisible:'#747f8d'};
-const STATUS_LABEL = {online:'Online',idle:'Idle',dnd:'Do Not Disturb',offline:'Offline',invisible:'Invisible'};
-const PLATFORM_ICON = {desktop:'🖥️',mobile:'📱',web:'🌐'};
+// ── Helpers ───────────────────────────────────────────────────────────
+const SC = {online:'#57f287',idle:'#fee75c',dnd:'#ed4245',offline:'#747f8d',invisible:'#747f8d'};
+const SL = {online:'Online',idle:'Idle',dnd:'Do Not Disturb',offline:'Offline',invisible:'Invisible'};
+const PI = {desktop:'🖥️',mobile:'📱',web:'🌐'};
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function fmt(n){return n>=1000?`${(n/1000).toFixed(1)}k`:String(n)}
 
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ── Health polling ────────────────────────────────────────────────────
+// ── Health + Stats ────────────────────────────────────────────────────
 async function loadHealth() {
   try {
-    const r = await fetch('/health');
-    const d = await r.json();
-    const s = d.services || {};
+    const [hRes, sRes] = await Promise.all([
+      fetch('/health'), fetch('/v1/stats')
+    ]);
+    const h = await hRes.json();
+    const s = sRes.ok ? await sRes.json() : null;
 
-    const fmt = (svc) => {
-      const ok = svc?.status === 'ok';
-      return `<span style="color:${ok?'var(--green)':'var(--red)'};font-weight:700;">${svc?.status||'—'}</span>`;
-    };
+    const ok   = h.status === 'healthy';
+    const sv   = h.services || {};
 
     // Stat cards
-    const allOk = d.status === 'healthy';
-    document.getElementById('stat-status').textContent  = allOk ? '✓' : '⚠';
-    document.getElementById('stat-status').className    = 'stat-value ' + (allOk ? 'stat-ok' : 'stat-warn');
-    document.getElementById('stat-status-sub').textContent = d.status || '—';
+    const sEl = (id) => document.getElementById(id);
+    sEl('s-status').textContent = ok ? '✓' : '⚠';
+    sEl('s-status').className   = 'stat-val ' + (ok ? 'ok' : 'warn');
+    sEl('s-status-s').textContent = h.status || '—';
 
-    document.getElementById('stat-redis').textContent   = s.redis?.status === 'ok' ? '✓' : '✗';
-    document.getElementById('stat-redis').className     = 'stat-value ' + (s.redis?.status==='ok' ? 'stat-ok' : 'stat-err');
-    document.getElementById('stat-redis-sub').textContent = s.redis?.latencyMs != null ? `${s.redis.latencyMs}ms latency` : 'cache layer';
+    sEl('s-redis').textContent   = sv.redis?.status === 'ok' ? '✓' : '✗';
+    sEl('s-redis').className     = 'stat-val ' + (sv.redis?.status === 'ok' ? 'ok' : 'err');
+    sEl('s-redis-s').textContent = sv.redis?.latencyMs != null ? `${sv.redis.latencyMs}ms` : '—';
 
-    document.getElementById('stat-mongo').textContent  = s.mongodb?.status === 'ok' ? '✓' : '⚡';
-    document.getElementById('stat-mongo').className    = 'stat-value ' + (s.mongodb?.status==='ok' ? 'stat-ok' : 'stat-warn');
+    if (s?.stats) {
+      sEl('s-reqs').textContent  = fmt(s.stats.totalRequests || 0);
+      sEl('s-users').textContent = fmt(s.stats.uniqueUsersTracked || 0);
+    }
 
-    document.getElementById('stat-discord').textContent = s.discord?.status?.includes('ok') ? '✓' : '⚡';
-    document.getElementById('stat-discord').className  = 'stat-value ' + (s.discord?.status?.includes('ok') ? 'stat-ok' : 'stat-warn');
-    document.getElementById('stat-discord-sub').textContent = s.discord?.status || '—';
-
-    // About tab detail
-    document.getElementById('health-detail').innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
-        <div style="display:flex;justify-content:space-between;"><span>Overall</span>${fmt({status:d.status?.replace('healthy','ok')})}</div>
-        <div style="display:flex;justify-content:space-between;"><span>Redis</span>${fmt(s.redis)} ${s.redis?.latencyMs!=null?`<span style="color:var(--muted);font-size:.7rem;">(${s.redis.latencyMs}ms)</span>`:''}</div>
-        <div style="display:flex;justify-content:space-between;"><span>MongoDB</span>${fmt(s.mongodb)}</div>
-        <div style="display:flex;justify-content:space-between;"><span>Discord</span><span style="font-size:.75rem;color:var(--muted);">${s.discord?.status||'—'}</span></div>
-        <div style="display:flex;justify-content:space-between;"><span>Uptime</span><span>${Math.floor((d.uptime||0)/3600)}h ${Math.floor(((d.uptime||0)%3600)/60)}m</span></div>
-        <div style="display:flex;justify-content:space-between;"><span>Checked</span><span style="color:var(--muted);font-size:.72rem;">${new Date().toLocaleTimeString()}</span></div>
-      </div>`;
+    // About health detail
+    const hd = document.getElementById('health-detail');
+    if (hd) {
+      const f = (svc) => `<span style="color:${svc?.status==='ok'?'var(--green)':'var(--red)'};font-weight:700">${svc?.status||'—'}</span>`;
+      hd.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px">
+          <div style="display:flex;justify-content:space-between"><span>Redis</span>${f(sv.redis)} ${sv.redis?.latencyMs!=null?`<span style="color:var(--muted);font-size:.7rem">${sv.redis.latencyMs}ms</span>`:''}</div>
+          <div style="display:flex;justify-content:space-between"><span>MongoDB</span>${f(sv.mongodb)}</div>
+          <div style="display:flex;justify-content:space-between"><span>Discord</span><span style="font-size:.75rem;color:var(--muted)">${sv.discord?.status||'—'}</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Uptime</span><span>${Math.floor((h.uptime||0)/3600)}h ${Math.floor(((h.uptime||0)%3600)/60)}m</span></div>
+          ${s?.stats?`
+          <div style="border-top:1px solid var(--border);margin-top:4px;padding-top:4px;display:flex;justify-content:space-between"><span>Total Requests</span><span style="font-weight:700">${fmt(s.stats.totalRequests||0)}</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Unique Users</span><span style="font-weight:700">${fmt(s.stats.uniqueUsersTracked||0)}</span></div>
+          `:''}
+        </div>`;
+    }
   } catch(e) {
-    document.getElementById('stat-status').textContent = '✗';
-    document.getElementById('stat-status').className = 'stat-value stat-err';
+    document.getElementById('s-status').textContent = '✗';
+    document.getElementById('s-status').className   = 'stat-val err';
   }
 }
 loadHealth();
-setInterval(loadHealth, 15000);
+setInterval(loadHealth, 20000);
 
-// ── Fetch Presence ────────────────────────────────────────────────────
+// ── Fetch presence ────────────────────────────────────────────────────
 let lastEtag = null;
 
-async function fetchPresence() {
-  const userId = document.getElementById('user-id-input').value.trim();
-  if (!userId) return;
+async function doFetch() {
+  const uid = document.getElementById('uid').value.trim();
+  if (!uid) return;
 
-  if (document.getElementById('show-html').checked) {
-    window.open(`/v1/users/${userId}`, '_blank');
-    return;
+  if (document.getElementById('open-html').checked) {
+    window.open(`/v1/users/${uid}`, '_blank'); return;
   }
 
   const btn = document.getElementById('fetch-btn');
-  btn.disabled = true; btn.textContent = 'Fetching…';
+  btn.disabled = true; btn.textContent = '…';
 
-  const headers = {'Accept':'application/json'};
-  const useEtag = document.getElementById('use-etag').checked;
-  if (useEtag && lastEtag) headers['If-None-Match'] = lastEtag;
+  const hdrs = {'Accept':'application/json'};
+  if (document.getElementById('use-etag').checked && lastEtag) hdrs['If-None-Match'] = lastEtag;
 
   const t0 = Date.now();
   try {
-    const res = await fetch(`/v1/users/${userId}?format=json`, {headers});
+    const res = await fetch(`/v1/users/${uid}?format=json`, {headers: hdrs});
     const ms  = Date.now() - t0;
     const etag = res.headers.get('ETag');
     const xc   = res.headers.get('X-Cache') || '—';
     if (etag) lastEtag = etag;
 
-    document.getElementById('response-meta').innerHTML = `
+    document.getElementById('res-meta').innerHTML = `
       <span>HTTP <strong style="color:${res.ok||res.status===304?'var(--green)':'var(--red)'}">${res.status}</strong></span>
-      <span>Latency <strong>${ms}ms</strong></span>
-      <span>X-Cache <strong style="color:${xc==='HIT'?'var(--green)':'var(--yellow)'}">${xc}</strong></span>
-      <span style="font-size:.7rem;">ETag <code style="color:var(--muted)">${etag||'—'}</code></span>
+      <span>${ms}ms</span>
+      <span>Cache: <strong style="color:${xc==='HIT'?'var(--green)':'var(--yellow)'}">${xc}</strong></span>
+      <span style="font-size:.68rem">ETag: <code style="color:var(--muted)">${etag||'—'}</code></span>
     `;
 
     if (res.status === 304) {
-      document.getElementById('json-pre').textContent = '// 304 Not Modified\n// ETag matched — no body, use cached data';
+      document.getElementById('json-pre').textContent = '// 304 Not Modified — ETag matched';
       return;
     }
 
     const data = await res.json();
     document.getElementById('json-pre').textContent = JSON.stringify(data, null, 2);
     syntaxHL();
-    if (res.ok && data.data) renderPresence(data.data, data.meta);
+    if (res.ok && data.data) renderPC(data.data, data.meta);
   } catch(err) {
     document.getElementById('json-pre').textContent = `// Error: ${err.message}`;
   } finally {
@@ -819,249 +658,188 @@ function copyJson() {
   navigator.clipboard.writeText(document.getElementById('json-pre').textContent);
   const b = document.querySelector('.copy-btn');
   b.textContent = 'Copied!';
-  setTimeout(()=>b.textContent='Copy', 1500);
+  setTimeout(() => b.textContent = 'Copy', 1400);
 }
 
-function renderPresence(d, meta) {
-  const wrap = document.getElementById('presence-display');
-  if (!d) { wrap.innerHTML = ''; return; }
+function renderPC(d, meta) {
+  const u  = d.user || {};
+  const a  = d.activities || {};
+  const sc = SC[d.status] || '#747f8d';
+  const sl = SL[d.status] || d.status;
+  const src = meta?.source || '';
 
-  const user   = d.user || {};
-  const acts   = d.activities || {};
-  const sc     = STATUS_COLOR[d.status] || '#747f8d';
-  const sl     = STATUS_LABEL[d.status] || d.status;
-  const source = meta?.source || '';
+  const banner = u.bannerUrl
+    ? `background-image:url('${esc(u.bannerUrl)}');background-size:cover;background-position:center`
+    : `background:linear-gradient(135deg,${sc}55,${sc}1a)`;
 
-  // Banner
-  const bannerStyle = user.bannerUrl
-    ? `background-image:url('${esc(user.bannerUrl)}');background-size:cover;background-position:center;`
-    : `background:linear-gradient(135deg,${sc}44 0%,${sc}11 100%);`;
+  const av = u.avatarUrl
+    ? `<img class="pc-av" src="${esc(u.avatarUrl)}" alt="av">`
+    : `<div class="pc-av-ph">${esc((u.displayName||u.username||'?')[0]).toUpperCase()}</div>`;
 
-  // Avatar
-  const avatarHtml = user.avatarUrl
-    ? `<img class="presence-avatar" src="${esc(user.avatarUrl)}" alt="avatar">`
-    : `<div class="presence-avatar-placeholder">${esc((user.displayName||user.username||'?')[0]).toUpperCase()}</div>`;
-
-  // Platform row
   const cs = d.clientStatus || {};
-  const platHtml = ['desktop','mobile','web']
+  const platH = ['desktop','mobile','web']
     .filter(k => cs[k] && cs[k] !== 'offline')
-    .map(k => `<span class="platform-badge"><span class="dot dot-${cs[k]}"></span>${PLATFORM_ICON[k]} ${cs[k]}</span>`)
+    .map(k => `<span class="plat-badge"><span class="dot dot-${cs[k]}"></span>${PI[k]} ${cs[k]}</span>`)
     .join('');
 
-  // Activities
-  let actsHtml = '';
+  let actsH = '';
 
-  // Custom status
-  if (acts.customStatus) {
-    const em  = acts.customStatus.emoji;
-    const emHtml = em?.url
-      ? `<img src="${esc(em.url)}" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" alt="${esc(em.name)}">`
-      : (em?.name || '');
-    actsHtml += `<div class="activity-block">
-      <div class="activity-label">Custom Status</div>
-      <div class="activity-name">${emHtml} ${esc(acts.customStatus.state||acts.customStatus.name||'')}</div>
-    </div>`;
+  if (a.customStatus) {
+    const em = a.customStatus.emoji;
+    const emH = em?.url ? `<img src="${esc(em.url)}" style="width:15px;height:15px;object-fit:contain;vertical-align:middle">` : (em?.name||'');
+    actsH += `<div class="act"><div class="act-lbl">Custom Status</div><div class="act-name">${emH} ${esc(a.customStatus.state||a.customStatus.name||'')}</div></div>`;
   }
 
-  // Spotify
-  if (acts.spotify) {
-    const sp = acts.spotify;
+  if (a.spotify) {
+    const sp = a.spotify;
     const prog = sp.duration?.durationMs
-      ? Math.min(100, ((Date.now() - (sp.duration.start||0)) / sp.duration.durationMs) * 100).toFixed(1)
+      ? Math.min(100,((Date.now()-(sp.duration.start||0))/sp.duration.durationMs)*100).toFixed(1)
       : 0;
-    actsHtml += `<div class="spotify-block">
-      ${sp.albumArt
-        ? `<img class="spotify-art" src="${esc(sp.albumArt)}" alt="album">`
-        : `<div class="spotify-art-placeholder">🎵</div>`}
-      <div class="spotify-info">
-        <div class="spotify-label">🎵 Listening to Spotify</div>
-        <div class="spotify-track">${esc(sp.song||'')}</div>
-        <div class="spotify-artist">by ${esc(sp.artist||'')}</div>
-        <div class="spotify-album">${esc(sp.album||'')}</div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>
+    actsH += `<div class="sp">
+      ${sp.albumArt?`<img class="sp-art" src="${esc(sp.albumArt)}" alt="art">`:`<div class="sp-art-ph">🎵</div>`}
+      <div class="sp-info">
+        <div class="sp-lbl">🎵 Spotify</div>
+        <div class="sp-track">${esc(sp.song||'')}</div>
+        <div class="sp-sub">by ${esc(sp.artist||'')} · ${esc(sp.album||'')}</div>
+        <div class="prog"><div class="prog-fill" style="width:${prog}%"></div></div>
       </div>
     </div>`;
   }
 
-  // Games / rich presence
-  (acts.games||[]).forEach(g => {
-    actsHtml += `<div class="activity-block">
-      <div class="activity-label">${g.type==='rich_presence'?'Rich Presence':'Playing'}</div>
-      <div style="display:flex;align-items:flex-start;gap:10px;">
-        ${g.largeImage?.url ? `<img src="${esc(g.largeImage.url)}" style="width:44px;height:44px;border-radius:6px;object-fit:cover;flex-shrink:0;">` : '🎮 '}
-        <div>
-          <div class="activity-name">${esc(g.name||'')}</div>
-          ${g.details?`<div class="activity-detail">${esc(g.details)}</div>`:''}
-          ${g.state?`<div class="activity-detail">${esc(g.state)}</div>`:''}
-        </div>
+  (a.games||[]).forEach(g => {
+    actsH += `<div class="act">
+      <div class="act-lbl">${g.type==='rich_presence'?'Rich Presence':'Playing'}</div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        ${g.largeImage?.url?`<img src="${esc(g.largeImage.url)}" style="width:40px;height:40px;border-radius:5px;object-fit:cover;flex-shrink:0">`:'🎮 '}
+        <div><div class="act-name">${esc(g.name||'')}</div>${g.details?`<div class="act-detail">${esc(g.details)}</div>`:''}${g.state?`<div class="act-detail">${esc(g.state)}</div>`:''}</div>
       </div>
     </div>`;
   });
 
-  // Streaming
-  if (acts.streaming) {
-    const str = acts.streaming;
-    actsHtml += `<div class="activity-block" style="border-color:rgba(237,66,69,.3);background:rgba(237,66,69,.06);">
-      <div class="activity-label" style="color:var(--red);">🔴 Live Streaming</div>
-      <div class="activity-name">${esc(str.name||'')}</div>
-      ${str.details?`<div class="activity-detail">${esc(str.details)}</div>`:''}
-      ${str.url?`<a href="${esc(str.url)}" target="_blank" style="font-size:.75rem;color:var(--accent2);">Watch on ${esc(str.platform||'stream')} ↗</a>`:''}
+  if (a.streaming) {
+    const st = a.streaming;
+    actsH += `<div class="act" style="border-color:rgba(237,66,69,.3);background:rgba(237,66,69,.06)">
+      <div class="act-lbl" style="color:var(--red)">🔴 Live</div>
+      <div class="act-name">${esc(st.name||'')}</div>
+      ${st.details?`<div class="act-detail">${esc(st.details)}</div>`:''}
+      ${st.url?`<a href="${esc(st.url)}" target="_blank" style="font-size:.73rem;color:var(--accent2)">Watch ↗</a>`:''}
     </div>`;
   }
 
-  // Offline / stale notices
-  const noticeHtml = d.stale
-    ? `<div class="stale-notice">⏱ Last known status — user may be offline or invisible</div>`
-    : (d.offline && !d.stale ? `<div class="offline-notice">● This user is currently offline or invisible</div>` : '');
+  const notice = d.stale
+    ? `<div class="notice-warn">⏱ Last known status — may be offline/invisible</div>`
+    : (d.offline && !d.stale ? `<div class="notice-off">● Currently offline or invisible</div>` : '');
 
-  wrap.innerHTML = `<div class="presence-card fade-in">
-    <div class="presence-banner" style="${bannerStyle}">
-      <div class="presence-avatar-wrap">
-        ${avatarHtml}
-        <div class="presence-status-ring" style="background:${sc};"></div>
+  document.getElementById('pc-wrap').innerHTML = `
+    <div class="pc">
+      <div class="pc-banner" style="${banner}">
+        <div class="pc-av-wrap">${av}<div class="pc-ring" style="background:${sc}"></div></div>
       </div>
-    </div>
-    <div class="presence-body">
-      <div class="presence-name">${esc(user.displayName||user.username||'Unknown')}</div>
-      <div class="presence-username">@${esc(user.username||'')}${user.discriminator?'#'+user.discriminator:''}</div>
-      <div class="presence-status-row">
-        <span class="presence-status-pill" style="background:${sc}22;color:${sc};border:1px solid ${sc}44;">
-          <span class="dot" style="background:${sc};"></span>${sl}
-        </span>
-        ${source?`<span style="font-size:.68rem;color:var(--muted);">${source==='cache'?'⚡ cached':'🔴 live'}</span>`:''}
+      <div class="pc-body">
+        <div class="pc-name">${esc(u.displayName||u.username||'Unknown')}</div>
+        <div class="pc-user">@${esc(u.username||'')}${u.discriminator?'#'+u.discriminator:''}</div>
+        <div class="pc-status">
+          <span class="status-pill" style="background:${sc}22;color:${sc};border:1px solid ${sc}44">
+            <span class="dot" style="background:${sc}"></span>${sl}
+          </span>
+          ${src?`<span style="font-size:.67rem;color:var(--muted)">${src==='cache'?'⚡ cached':'🔴 live'}</span>`:''}
+        </div>
+        ${platH?`<div class="plat-row">${platH}</div>`:''}
+        ${notice}
+        ${actsH}
+        <div style="margin-top:10px;font-size:.67rem;color:var(--muted)">
+          Updated ${new Date(d.updatedAt||Date.now()).toLocaleTimeString()} ·
+          <a href="/v1/users/${esc(d.userId)}" target="_blank" style="color:var(--accent2);text-decoration:none">HTML card ↗</a>
+        </div>
       </div>
-      ${platHtml?`<div class="platform-row">${platHtml}</div>`:''}
-      ${noticeHtml}
-      ${actsHtml}
-      <div style="margin-top:12px;font-size:.68rem;color:var(--muted);">
-        Updated ${new Date(d.updatedAt||Date.now()).toLocaleTimeString()} ·
-        <a href="/v1/users/${esc(d.userId)}" target="_blank" style="color:var(--accent2);text-decoration:none;">HTML card ↗</a>
-      </div>
-    </div>
-  </div>`;
+    </div>`;
 }
 
-// Enter key
-document.getElementById('user-id-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') fetchPresence();
-});
+document.getElementById('uid').addEventListener('keydown', e => e.key==='Enter' && doFetch());
 
-// ── WebSocket ──────────────────────────────────────────────────────────
-let ws = null;
-const wsCache = {};
+// ── WebSocket ─────────────────────────────────────────────────────────
+let ws = null, wsCache = {};
 
 function wsConnect() {
   const url = document.getElementById('ws-url').value.trim();
   if (ws) ws.close();
   ws = new WebSocket(url);
   wsLog('sys', `Connecting to ${url}…`);
-
-  ws.onopen = () => {
+  ws.onopen  = () => {
     wsLog('sys', '✅ Connected');
-    const btn = document.getElementById('ws-connect-btn');
-    btn.textContent = 'Disconnect'; btn.className = 'btn btn-danger'; btn.onclick = wsDisconnect;
+    const b = document.getElementById('ws-btn');
+    b.textContent = 'Disconnect'; b.className = 'btn'; b.style.background='var(--red)'; b.style.color='#fff'; b.onclick = wsDisc;
   };
-
-  ws.onmessage = ({ data }) => {
+  ws.onmessage = ({data}) => {
     try {
-      const msg = JSON.parse(data);
-      const short = JSON.stringify(msg).slice(0, 200);
-      const cls   = msg.type === 'PRESENCE_UPDATE' ? 'upd' : 'in';
-      wsLog(cls, `← ${short}${short.length>=200?'…':''}`);
-      if (msg.type === 'PRESENCE_UPDATE' && msg.data) {
-        wsCache[msg.userId] = msg.data;
-        renderWsCards();
-      }
-      if (msg.type === 'PONG') wsLog('sys', `PONG — latency ${Date.now()-msg.ts}ms`);
-    } catch { wsLog('in', data); }
+      const m = JSON.parse(data);
+      wsLog(m.type==='PRESENCE_UPDATE'?'upd':'in', `← ${JSON.stringify(m).slice(0,180)}`);
+      if (m.type==='PRESENCE_UPDATE'&&m.data){wsCache[m.userId]=m.data;renderWsCards();}
+      if (m.type==='PONG') wsLog('sys',`PONG ${Date.now()-m.ts}ms`);
+    } catch{wsLog('in',data);}
   };
-
-  ws.onerror = () => wsLog('err', '❌ WebSocket error');
+  ws.onerror = () => wsLog('err','❌ Error');
   ws.onclose = () => {
-    wsLog('sys', '❌ Disconnected');
-    const btn = document.getElementById('ws-connect-btn');
-    btn.textContent = 'Connect'; btn.className = 'btn btn-success'; btn.onclick = wsConnect;
+    wsLog('sys','❌ Disconnected');
+    const b = document.getElementById('ws-btn');
+    b.textContent='Connect'; b.className='btn btn-primary'; b.style=''; b.onclick=wsConnect;
   };
 }
-
-function wsDisconnect() { ws?.close(); }
-
-function wsSubscribe() {
-  const id = document.getElementById('ws-user-id').value.trim();
-  if (!id) return;
-  wsSendMsg({ type: 'SUBSCRIBE', userId: id });
-}
-
-function wsSendMsg(obj) {
-  if (!ws || ws.readyState !== WebSocket.OPEN) {
-    wsLog('err', 'Not connected — click Connect first'); return;
-  }
-  wsLog('out', `→ ${JSON.stringify(obj)}`);
+function wsDisc(){ws?.close()}
+function wsSub(){const id=document.getElementById('ws-uid').value.trim();if(id)wsSend({type:'SUBSCRIBE',userId:id})}
+function wsSend(obj){
+  if(!ws||ws.readyState!==WebSocket.OPEN){wsLog('err','Not connected');return;}
+  wsLog('out',`→ ${JSON.stringify(obj)}`);
   ws.send(JSON.stringify(obj));
 }
-
-function wsSendCustom() {
-  const raw = document.getElementById('ws-custom').value.trim();
-  try { wsSendMsg(JSON.parse(raw)); } catch { wsLog('err', 'Invalid JSON'); }
+function wsSendCustom(){try{wsSend(JSON.parse(document.getElementById('ws-custom').value.trim()));}catch{wsLog('err','Invalid JSON');}}
+function wsLog(cls,text){
+  const t=document.getElementById('ws-term');
+  const el=document.createElement('div');
+  el.className=`wl ${cls}`;
+  el.textContent=`[${new Date().toLocaleTimeString()}] ${text}`;
+  t.appendChild(el); t.scrollTop=t.scrollHeight;
+  while(t.children.length>100)t.removeChild(t.firstChild);
 }
-
-function wsLog(cls, text) {
-  const term = document.getElementById('ws-terminal');
-  const el   = document.createElement('div');
-  el.className = `ws-line ${cls}`;
-  el.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
-  term.appendChild(el);
-  term.scrollTop = term.scrollHeight;
-  while (term.children.length > 120) term.removeChild(term.firstChild);
-}
-
-function renderWsCards() {
-  const entries = Object.values(wsCache);
-  if (!entries.length) return;
-  const container = document.getElementById('ws-live-cards');
-  container.innerHTML = `<div class="card-title" style="margin-bottom:8px;">Live Tracked Users (${entries.length})</div>` +
-    entries.map(d => {
-      const sc = STATUS_COLOR[d.status]||'#747f8d';
-      const u  = d.user||{};
-      return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;margin-bottom:8px;border:1px solid var(--border);">
-        <span class="dot dot-${d.status} dot-pulse"></span>
-        <img src="${esc(u.avatarUrl||'')}" width="34" height="34" style="border-radius:50%;object-fit:cover;background:var(--border);" onerror="this.style.display='none'">
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:.85rem;font-weight:600;">${esc(u.displayName||u.username||d.userId)}</div>
-          <div style="font-size:.72rem;color:var(--muted);">
-            ${STATUS_LABEL[d.status]||d.status}
-            ${d.activities?.spotify ? ' · 🎵 '+esc(d.activities.spotify.song||'Spotify') : ''}
-            ${d.activities?.games?.length ? ' · 🎮 '+esc(d.activities.games[0].name||'Game') : ''}
-            ${d.activities?.streaming ? ' · 🔴 Live' : ''}
-          </div>
+function renderWsCards(){
+  const c=document.getElementById('ws-cards');
+  const entries=Object.values(wsCache);
+  if(!entries.length)return;
+  c.innerHTML=`<div class="card-title" style="margin-bottom:7px">Live (${entries.length})</div>`+
+    entries.map(d=>{
+      const u=d.user||{};const sc=SC[d.status]||'#747f8d';
+      return `<div style="display:flex;align-items:center;gap:9px;padding:9px;background:var(--surface2);border-radius:8px;margin-bottom:7px;border:1px solid var(--border)">
+        <span class="dot dot-${d.status} dot-pulse" style="background:${sc}"></span>
+        <img src="${esc(u.avatarUrl||'')}" width="32" height="32" style="border-radius:50%;object-fit:cover;background:var(--border);flex-shrink:0" onerror="this.style.display='none'">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.83rem;font-weight:600">${esc(u.displayName||u.username||d.userId)}</div>
+          <div style="font-size:.7rem;color:var(--muted)">${SL[d.status]||d.status}${d.activities?.spotify?' · 🎵':''} ${d.activities?.games?.length?' · 🎮':''} ${d.activities?.streaming?' · 🔴':''}</div>
         </div>
-        <button class="btn btn-ghost" style="font-size:.7rem;padding:3px 8px;"
-          onclick="document.getElementById('user-id-input').value='${esc(d.userId)}';showTab('try',event);fetchPresence();">
-          View
-        </button>
+        <button class="btn btn-ghost" style="font-size:.68rem;padding:3px 8px;flex-shrink:0"
+          onclick="document.getElementById('uid').value='${esc(d.userId)}';showTab('try',event);doFetch()">View</button>
       </div>`;
     }).join('');
 }
 
-// ── Endpoints table ────────────────────────────────────────────────────
-const ENDPOINTS = [
-  {m:'GET',  p:'/v1/users/:id',          d:'Full profile + presence (HTML or JSON)', c:'60s ETag'},
-  {m:'GET',  p:'/v1/users/:id/presence', d:'Presence data only',                     c:'30s ETag'},
-  {m:'GET',  p:'/v1/users/:id/status',   d:'Status string only — ultra-light',       c:'15s ETag'},
-  {m:'GET',  p:'/v1/users/:id/history',  d:'Historical snapshots (MongoDB)',          c:'no-store'},
-  {m:'GET',  p:'/v1/analytics/overview', d:'24h API + presence stats',               c:'—'},
-  {m:'GET',  p:'/health',                d:'Redis / MongoDB / Discord health',        c:'no-store'},
-  {m:'GET',  p:'/docs',                  d:'Interactive Swagger UI',                  c:'—'},
+// ── Endpoints table ───────────────────────────────────────────────────
+const EPS = [
+  {m:'GET',p:'/v1/users/:id',          d:'Full profile + presence',       c:'60s ETag'},
+  {m:'GET',p:'/v1/users/:id/presence', d:'Presence only',                 c:'30s ETag'},
+  {m:'GET',p:'/v1/users/:id/status',   d:'Status string — ultra-light',   c:'15s ETag'},
+  {m:'GET',p:'/v1/users/:id/history',  d:'History snapshots (MongoDB)',    c:'no-store'},
+  {m:'GET',p:'/v1/stats',              d:'API usage statistics',           c:'—'},
+  {m:'GET',p:'/v1/analytics/overview', d:'24h analytics',                 c:'—'},
+  {m:'GET',p:'/health',                d:'Service health check',           c:'no-store'},
+  {m:'GET',p:'/docs',                  d:'Swagger UI',                    c:'—'},
 ];
-const MC = {GET:'var(--green)',POST:'var(--yellow)',DELETE:'var(--red)'};
-document.getElementById('ep-table').innerHTML = ENDPOINTS.map(e=>`
+const MC={GET:'var(--green)',POST:'var(--yellow)'};
+document.getElementById('ep-body').innerHTML = EPS.map(e=>`
   <tr>
-    <td><code style="color:${MC[e.m]||'var(--text)'};font-size:.78rem;font-weight:700;">${e.m}</code></td>
-    <td><code style="color:var(--accent2);font-size:.78rem;">${e.p}</code></td>
-    <td style="color:var(--muted);font-size:.8rem;">${e.d}</td>
-    <td style="color:var(--muted);font-size:.73rem;">${e.c}</td>
-    <td><a href="${e.p.replace(':id','111111111111111111')}" target="_blank" style="font-size:.72rem;color:var(--accent2);text-decoration:none;">Try ↗</a></td>
+    <td><code style="color:${MC[e.m]||'var(--text)'};font-size:.76rem;font-weight:700">${e.m}</code></td>
+    <td><code style="color:var(--accent2);font-size:.76rem">${e.p}</code></td>
+    <td style="color:var(--muted);font-size:.78rem">${e.d}</td>
+    <td class="hide-mob" style="color:var(--muted);font-size:.72rem">${e.c}</td>
+    <td><a href="${e.p.replace(':id','111111111111111111')}" target="_blank" style="font-size:.7rem;color:var(--accent2);text-decoration:none">Try ↗</a></td>
   </tr>`).join('');
 </script>
 </body>

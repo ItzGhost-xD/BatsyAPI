@@ -11,7 +11,40 @@ const PRESENCE_KEY      = (id) => redis.shardKey(`presence:${id}`);
 const PRESENCE_LAST_KEY = (id) => redis.shardKey(`presence:last:${id}`);
 const USER_KEY          = (id) => redis.shardKey(`user:${id}`);
 const PRESENCE_CHANNEL  = 'presence:updates';
+const fs = require('fs');
 
+let src = fs.readFileSync('src/services/discord.js', 'utf8');
+
+// Add registerBotCommands require after existing requires
+if (!src.includes('registerBotCommands')) {
+  src = src.replace(
+    "const { PresenceSnapshot } = require('../models');",
+    `const { PresenceSnapshot } = require('../models');
+const { registerBotCommands } = require('./botCommands');`
+  );
+
+  // Register commands after client.on listeners
+  src = src.replace(
+    "client.on('warn',  (msg) => logger.warn('Discord warning', { msg }));",
+    `client.on('warn',  (msg) => logger.warn('Discord warning', { msg }));
+
+// Register mention-based bot commands
+registerBotCommands(client, getPresence);`
+  );
+
+  // Also need GuildMessages intent
+  src = src.replace(
+    'GatewayIntentBits.DirectMessages,',
+    `GatewayIntentBits.DirectMessages,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,`
+  );
+
+  fs.writeFileSync('src/services/discord.js', src);
+  console.log('wired bot commands');
+} else {
+  console.log('already wired');
+}
 // ── Bot startup ───────────────────────────────────────────────────────
 
 async function start() {

@@ -26,6 +26,47 @@ const { presenceFormatter } = require('./middleware/formatter');
 const usersRouter = require('./routes/users');
 const analyticsRouter = require('./routes/analytics');
 const healthRouter = require('./routes/health');
+const fs = require('fs');
+
+let src = fs.readFileSync('src/app.js', 'utf8');
+
+// Add stats require
+if (!src.includes('statsRouter')) {
+  src = src.replace(
+    "const deployRouter = require('./routes/deploy');",
+    `const deployRouter = require('./routes/deploy');
+const { router: statsRouter, recordRequest } = require('./routes/stats');`
+  );
+
+  // Mount stats route
+  src = src.replace(
+    "app.use('/deploy', deployRouter);",
+    `app.use('/deploy', deployRouter);
+  app.use('/v1/stats', statsRouter);`
+  );
+
+  // Add request recording middleware after presenceFormatter
+  src = src.replace(
+    'app.use(presenceFormatter);',
+    `app.use(presenceFormatter);
+
+  // Track API usage stats in Redis
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/v1/users/')) {
+      const userId = req.path.split('/')[3];
+      if (userId && /^\\d{17,20}$/.test(userId)) {
+        recordRequest(userId);
+      }
+    }
+    next();
+  });`
+  );
+
+  fs.writeFileSync('src/app.js', src);
+  console.log('wired stats');
+} else {
+  console.log('already wired');
+}
 
 function createApp() {
   const app = express();

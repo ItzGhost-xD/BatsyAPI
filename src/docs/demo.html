@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   BatsyAPI — Discord Presence API Dashboard
-  Developer : Venom
+  Developer : Ghost
   Team      : Veyron Labs
   GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
   License   : MIT © 2024 Veyron Labs
@@ -10,9 +10,14 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<meta name="author" content="Venom — Veyron Labs"/>
+<meta name="author" content="Ghost — Veyron Labs"/>
 <meta name="theme-color" content="#5865F2"/>
 <title>BatsyAPI — Discord Presence</title>
+// Add favicon + manifest links after the <title> tag
+const faviconTags = \`<link rel=\"icon\" type=\"image/svg+xml\" href=\"/favicon.svg\"/>
+<link rel=\"shortcut icon\" href=\"/favicon.svg\"/>
+<link rel=\"manifest\" href=\"/site.webmanifest\"/>
+<meta name=\"theme-color\" content=\"#5865F2\"/>\`;
 <style>
 :root {
   --bg:#0e1117; --surface:#161b22; --surface2:#1c2330; --border:#30363d;
@@ -259,7 +264,7 @@ label{font-size:.76rem;color:var(--muted);margin-bottom:5px;display:block}
     <h1>BatsyAPI</h1>
     <p class="hero-sub">Discord presence tracking — status, Spotify, games, rich presence &amp; more</p>
     <p class="hero-credit">
-      by <strong>Venom</strong> ·
+      by <strong>Ghost</strong> ·
       <a href="https://github.com/ItzGhost-xD/BatsyAPI" target="_blank">GitHub ↗</a> ·
       <a href="/docs" target="_blank">API Docs ↗</a>
     </p>
@@ -427,7 +432,7 @@ label{font-size:.76rem;color:var(--muted);margin-bottom:5px;display:block}
         <div class="card">
           <div class="card-title">Project Info</div>
           <div class="about-row"><span class="about-lbl">Name</span><span class="about-val">BatsyAPI</span></div>
-          <div class="about-row"><span class="about-lbl">Developer</span><span class="about-val">Venom</span></div>
+          <div class="about-row"><span class="about-lbl">Developer</span><span class="about-val">Ghost</span></div>
           <div class="about-row"><span class="about-lbl">Team</span><span class="about-val" style="color:var(--accent2)">Veyron Labs</span></div>
           <div class="about-row"><span class="about-lbl">Version</span><span class="about-val">v1.0.0</span></div>
           <div class="about-row"><span class="about-lbl">License</span><span class="about-val">MIT</span></div>
@@ -452,7 +457,7 @@ label{font-size:.76rem;color:var(--muted);margin-bottom:5px;display:block}
           </p>
           <div class="code" style="margin-top:10px">
             <pre style="color:#86efac">Powered by BatsyAPI
-Built by Venom @ Veyron Labs
+Built by Ghost @ Veyron Labs
 github.com/ItzGhost-xD/BatsyAPI</pre>
           </div>
         </div>
@@ -490,7 +495,7 @@ github.com/ItzGhost-xD/BatsyAPI</pre>
 
 <!-- Footer -->
 <footer class="footer">
-  <strong>BatsyAPI</strong> — built by <strong>Venom</strong> @ <strong>Veyron Labs</strong> ·
+  <strong>BatsyAPI</strong> — built by <strong>Ghost</strong> @ <strong>Veyron Labs</strong> ·
   <a href="https://github.com/ItzGhost-xD/BatsyAPI" target="_blank">GitHub ↗</a> ·
   <a href="/docs" target="_blank">Swagger ↗</a> ·
   <a href="/health">Health ↗</a><br>
@@ -518,7 +523,7 @@ github.com/ItzGhost-xD/BatsyAPI</pre>
 <script>
 /*
  * BatsyAPI Dashboard Script
- * Developer : Venom @ Veyron Labs
+ * Developer : Ghost @ Veyron Labs
  * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
  */
 

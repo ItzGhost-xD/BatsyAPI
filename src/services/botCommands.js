@@ -1,6 +1,6 @@
 /**
  * BatsyAPI — Discord Presence API
- * Developer : Venom
+ * Developer : Ghost
  * Team      : Veyron Labs
  * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
  * License   : MIT © 2024 Veyron Labs
@@ -24,7 +24,7 @@ function buildHelpEmbed(client) {
     .setTitle('👋 Hey! I\'m Batsy')
     .setDescription(
       'I track Discord presence in real-time — status, Spotify, games, rich presence, and more.\n' +
-      'Built by **Venom** @ **Veyron Labs**.'
+      'Built by **Ghost** @ **Veyron Labs**.'
     )
     .addFields(
       {
@@ -78,7 +78,7 @@ function buildHelpEmbed(client) {
       }
     )
     .setFooter({
-      text: `BatsyAPI by Venom @ Veyron Labs • ${new Date().toLocaleString()}`,
+      text: `BatsyAPI by Ghost @ Veyron Labs • ${new Date().toLocaleString()}`,
     })
     .setTimestamp();
 }
@@ -159,7 +159,7 @@ function buildPresenceEmbed(data, userId) {
       value: `[View Full Presence Card](${API_URL}/v1/users/${userId})`,
       inline: false,
     })
-    .setFooter({ text: `BatsyAPI by Venom @ Veyron Labs • Updated` })
+    .setFooter({ text: `BatsyAPI by Ghost @ Veyron Labs • Updated` })
     .setTimestamp(new Date(data.updatedAt || Date.now()));
 
   return embed;
@@ -227,7 +227,7 @@ function registerBotCommands(client, getPresenceFn) {
             { name: 'Gateway Ping',        value: `${client.ws.ping}ms`,  inline: true },
             { name: 'Guilds',              value: String(client.guilds.cache.size), inline: true },
           )
-          .setFooter({ text: 'BatsyAPI by Venom @ Veyron Labs' })
+          .setFooter({ text: 'BatsyAPI by Ghost @ Veyron Labs' })
           .setTimestamp();
         return message.reply({ embeds: [embed] });
       } catch {

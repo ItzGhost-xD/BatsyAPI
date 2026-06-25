@@ -1,0 +1,12 @@
+{
+  "name": "BatsyAPI",
+  "short_name": "BatsyAPI",
+  "description": "Discord Presence API by Veyron Labs",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0e1117",
+  "theme_color": "#5865F2",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

@@ -1,3 +1,11 @@
+/**
+ * BatsyAPI — Discord Presence API
+ * Developer : Venom
+ * Team      : Veyron Labs
+ * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
+ * License   : MIT © 2024 Veyron Labs
+ */
+
 const crypto = require('crypto');
 const config = require('../../config');
 

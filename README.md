@@ -1,10 +1,8 @@
 <div align="center">
 
-# Batsy - Discord Presence API
+# ⚡ Discord Presence API
 
 **Production-grade REST + WebSocket API for real-time Discord presence data**
-
-**Developer:** ItzGhost-xD · **Repo:** https://github.com/ItzGhost-xD/BatsyAPI
 
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green?logo=node.js)](https://nodejs.org)
 [![Redis](https://img.shields.io/badge/Redis-7-red?logo=redis)](https://redis.io)
@@ -32,17 +30,17 @@ Status badges · Online/Idle/DND/Offline · Spotify · Rich Presence · Games ·
 | **Rate limiting** | Per-IP REST limits + WS connection cap |
 | **Sharding** | Horizontal scaling via `SHARD_ID` / `SHARD_COUNT` |
 | **Docs** | Swagger UI at `/docs` + interactive demo at `/` |
-| **Mock mode** | Works without a real Discord token for dev/testing. Seeded demo users: `111111111111111111`, `222222222222222222`, `333333333333333333` |
+| **Mock mode** | Works without a real Discord token for dev/testing |
 
 ---
 
-##  Quick Start
+## 🚀 Quick Start
 
 ### Option A — Docker (recommended)
 
 ```bash
-git clone https://github.com/ItzGhost-xD/BatsyAPI.git
-cd BatsyAPI
+git clone https://github.com/YOUR_USERNAME/discord-presence-api.git
+cd discord-presence-api
 
 cp .env.example .env
 # Edit .env — set DISCORD_BOT_TOKEN at minimum
@@ -56,8 +54,8 @@ Open **http://localhost:3000/docs** — Swagger UI.
 ### Option B — Local Node.js
 
 ```bash
-git clone https://github.com/ItzGhost-xD/BatsyAPI.git
-cd BatsyAPI
+git clone https://github.com/YOUR_USERNAME/discord-presence-api.git
+cd discord-presence-api
 
 npm install
 cp .env.example .env
@@ -71,14 +69,14 @@ npm start
 
 ---
 
-## Discord Bot Setup
+## 🤖 Discord Bot Setup
 
 1. Go to [discord.com/developers/applications](https://discord.com/developers/applications) → **New Application**
 2. **Bot** tab → **Add Bot** → copy the token
 3. Paste it as `DISCORD_BOT_TOKEN` in your `.env`
 4. Under **Privileged Gateway Intents**, enable:
-   -  **Server Members Intent**
-   -  **Presence Intent**
+   - ✅ **Server Members Intent**
+   - ✅ **Presence Intent**
 5. Invite URL: `https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&scope=bot&permissions=0`
 6. The bot only needs to **share a guild** with users you want to track — no special permissions needed
 
@@ -86,7 +84,7 @@ npm start
 
 ---
 
-##  REST API
+## 📡 REST API
 
 **Base URL:** `/v1`
 
@@ -239,7 +237,7 @@ node scripts/ws-client.js 111111111111111111
 
 ---
 
-##  Configuration
+## ⚙️ Configuration
 
 Copy `.env.example` to `.env` and fill in:
 
@@ -247,12 +245,10 @@ Copy `.env.example` to `.env` and fill in:
 |---|---|---|
 | `DISCORD_BOT_TOKEN` | — | **Required for live data.** From Discord Developer Portal |
 | `PORT` | `3000` | HTTP port |
-| `API_BASE_URL` | `http://localhost:3000` | Base public URL for generated links and docs |
 | `REDIS_URL` | `redis://localhost:6379` | Redis connection string |
 | `REDIS_TTL` | `300` | Presence cache TTL in seconds |
 | `REDIS_USER_TTL` | `3600` | User profile cache TTL in seconds |
 | `MONGODB_URI` | `mongodb://localhost:27017/discord_presence` | MongoDB connection string |
-| `RATE_LIMIT_WINDOW_MS` | `60000` | Rate limit window length, in milliseconds |
 | `RATE_LIMIT_MAX` | `100` | Requests per minute per IP |
 | `WS_RATE_LIMIT_MAX` | `10` | Max WebSocket connections per IP |
 | `API_KEY_REQUIRED` | `false` | Set `true` to enable API key gate |
@@ -264,7 +260,7 @@ Copy `.env.example` to `.env` and fill in:
 
 ---
 
-##  Architecture
+## 🏗️ Architecture
 
 ```
                     ┌─────────────┐
@@ -293,12 +289,12 @@ Discord Gateway ──► presenceUpdate event ──► Redis cache + pub/sub �
 
 ---
 
-##  Deploying to a VPS
+## 🌍 Deploying to a VPS
 
 ```bash
 # 1. Clone on your server
-git clone https://github.com/ItzGhost-xD/BatsyAPI.git
-cd BatsyAPI
+git clone https://github.com/YOUR_USERNAME/discord-presence-api.git
+cd discord-presence-api
 
 # 2. Configure
 cp .env.example .env
@@ -309,7 +305,7 @@ docker compose up -d
 
 # 4. Install Nginx + SSL
 sudo apt install nginx certbot python3-certbot-nginx
-sudo certbot --nginx -d example.com
+sudo certbot --nginx -d your-domain.com
 
 # 5. Apply Nginx config
 sudo cp nginx.conf /etc/nginx/sites-available/presence-api
@@ -317,7 +313,7 @@ sudo ln -s /etc/nginx/sites-available/presence-api /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 
 # 6. Check health
-curl https://example.com/health
+curl https://your-domain.com/health
 ```
 
 ### Horizontal scaling
@@ -333,10 +329,10 @@ SHARD_COUNT=3 SHARD_ID=2 PORT=3002 docker compose up -d
 
 ---
 
-##  Project Structure
+## 📁 Project Structure
 
 ```
-BatsyAPI/
+discord-presence-api/
 ├── config/
 │   └── index.js              # All env config in one place
 ├── src/
@@ -381,7 +377,7 @@ BatsyAPI/
 
 ---
 
-##  Testing
+## 🧪 Testing
 
 ```bash
 # Start the server (mock mode, no token needed)
@@ -404,21 +400,6 @@ curl "http://localhost:3000/v1/users/111111111111111111/status"   # status only
 
 ---
 
-##  Future Improvements
-
-- Add automated tests for routes, WebSocket behavior, and mock data paths.
-- Replace unused or undeclared dependencies with only those the app uses.
-- Add request/response validation using `Joi` or similar schemas for all API endpoints.
-- Add a documented API key signup flow or OAuth integration for public usage.
-- Add metrics dashboards (Prometheus / Grafana) and better logging contexts.
-- Harden security with CSP, stricter CORS policies, and `helmet` defaults enabled.
-- Improve the WebSocket protocol with auth, reconnection guidance, and stats endpoints.
-- Add a Docker healthcheck for Redis / Mongo and a production Dockerfile/service configuration.
-- Add formal docs for deploying to production, HTTPS, and horizontal sharding.
-- Add versioned API support and migration docs for future breaking changes.
-
----
-
-##  License
+## 📄 License
 
 MIT — see [LICENSE](LICENSE)

@@ -1,7 +1,7 @@
 /**
  * ╔══════════════════════════════════════════════════════╗
  * ║  BatsyAPI — Discord Presence API                    ║
- * ║  Developer : Ghost                                   ║
+ * ║  Developer : Venom                                   ║
  * ║  Team      : Veyron Labs                             ║
  * ║  GitHub    : github.com/ItzGhost-xD/BatsyAPI        ║
  * ║  License   : MIT © 2024 Veyron Labs                 ║
@@ -16,7 +16,7 @@ const config = require('../config');
 const logger = require('./utils/logger');
 
 async function main() {
-  logger.info(`Starting BatsyAPI [shard ${config.discord.shardId}/${config.discord.shardCount}] — by Ghost @ Veyron Labs`);
+  logger.info(`Starting BatsyAPI [shard ${config.discord.shardId}/${config.discord.shardCount}] — by Venom @ Veyron Labs`);
 
   // 1. Redis
   const redis = require('./services/redis');

@@ -1,4 +1,12 @@
 /**
+ * BatsyAPI — Discord Presence API
+ * Developer : Venom
+ * Team      : Veyron Labs
+ * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
+ * License   : MIT © 2024 Veyron Labs
+ */
+
+/**
  * responseFormatter.js
  *
  * Wraps presence data in a beautiful HTML card when the client
@@ -16,10 +24,10 @@ const STATUS_COLORS = {
 };
 
 const STATUS_LABELS = {
-  online: 'Online',
-  idle: 'Idle',
-  dnd: 'Do Not Disturb',
-  offline: 'Offline',
+  online:    'Online',
+  idle:      'Idle',
+  dnd:       'Do Not Disturb',
+  offline:   'Offline',
   invisible: 'Invisible',
 };
 

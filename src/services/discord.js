@@ -1,9 +1,18 @@
+/**
+ * BatsyAPI — Discord Presence API
+ * Developer : Venom
+ * Team      : Veyron Labs
+ * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
+ * License   : MIT © 2024 Veyron Labs
+ */
+
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const config = require('../../config');
 const logger = require('../utils/logger');
 const redis  = require('./redis');
 const { parsePresence, avatarUrl, bannerUrl } = require('./presenceParser');
 const { PresenceSnapshot } = require('../models');
+const { registerBotCommands } = require('./botCommands');
 
 let client = null;
 
@@ -11,40 +20,7 @@ const PRESENCE_KEY      = (id) => redis.shardKey(`presence:${id}`);
 const PRESENCE_LAST_KEY = (id) => redis.shardKey(`presence:last:${id}`);
 const USER_KEY          = (id) => redis.shardKey(`user:${id}`);
 const PRESENCE_CHANNEL  = 'presence:updates';
-const fs = require('fs');
 
-let src = fs.readFileSync('src/services/discord.js', 'utf8');
-
-// Add registerBotCommands require after existing requires
-if (!src.includes('registerBotCommands')) {
-  src = src.replace(
-    "const { PresenceSnapshot } = require('../models');",
-    `const { PresenceSnapshot } = require('../models');
-const { registerBotCommands } = require('./botCommands');`
-  );
-
-  // Register commands after client.on listeners
-  src = src.replace(
-    "client.on('warn',  (msg) => logger.warn('Discord warning', { msg }));",
-    `client.on('warn',  (msg) => logger.warn('Discord warning', { msg }));
-
-// Register mention-based bot commands
-registerBotCommands(client, getPresence);`
-  );
-
-  // Also need GuildMessages intent
-  src = src.replace(
-    'GatewayIntentBits.DirectMessages,',
-    `GatewayIntentBits.DirectMessages,
-      GatewayIntentBits.GuildMessages,
-      GatewayIntentBits.MessageContent,`
-  );
-
-  fs.writeFileSync('src/services/discord.js', src);
-  console.log('wired bot commands');
-} else {
-  console.log('already wired');
-}
 // ── Bot startup ───────────────────────────────────────────────────────
 
 async function start() {
@@ -54,13 +30,15 @@ async function start() {
       GatewayIntentBits.GuildPresences,
       GatewayIntentBits.GuildMembers,
       GatewayIntentBits.DirectMessages,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
     ],
     partials: [Partials.User, Partials.GuildMember],
     shards:     config.discord.shardId,
     shardCount: config.discord.shardCount,
   });
 
-  client.on('ready', () => {
+  client.on('clientReady', () => {
     logger.info(`Discord bot ready — logged in as ${client.user.tag}`);
     logger.info(`Shard ${config.discord.shardId}/${config.discord.shardCount} — ${client.guilds.cache.size} guilds`);
   });
@@ -68,6 +46,9 @@ async function start() {
   client.on('presenceUpdate', handlePresenceUpdate);
   client.on('error', (e) => logger.error('Discord client error', { err: e.message }));
   client.on('warn',  (msg) => logger.warn('Discord warning', { msg }));
+
+  // Register mention-based bot commands
+  registerBotCommands(client, getPresence);
 
   if (config.discord.token) {
     await client.login(config.discord.token);

@@ -9,7 +9,6 @@ COPY . .
 
 # Non-root user for security
 RUN addgroup -g 1001 -S nodejs && adduser -S nodeapp -u 1001
-RUN mkdir -p /app/logs && chown -R nodeapp:nodejs /app
 USER nodeapp
 
 EXPOSE 3000

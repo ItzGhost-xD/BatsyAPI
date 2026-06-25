@@ -1,4 +1,12 @@
 /**
+ * BatsyAPI — Discord Presence API
+ * Developer : Venom
+ * Team      : Veyron Labs
+ * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
+ * License   : MIT © 2024 Veyron Labs
+ */
+
+/**
  * src/services/index.js
  *
  * Single source of truth for which Discord service is active.

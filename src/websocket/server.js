@@ -1,3 +1,11 @@
+/**
+ * BatsyAPI — Discord Presence API
+ * Developer : Venom
+ * Team      : Veyron Labs
+ * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
+ * License   : MIT © 2024 Veyron Labs
+ */
+
 const { WebSocketServer, WebSocket } = require('ws');
 const { v4: uuidv4 } = require('uuid');
 const redis = require('../services/redis');
@@ -176,7 +184,7 @@ function createWsServer(httpServer) {
       type: 'HELLO',
       message: 'Discord Presence WebSocket v1',
       sessionId: ws.id,
-      docs: 'https://github.com/ItzGhost-xD/BatsyAPI#websocket',
+      docs: 'https://github.com/your-org/discord-presence-api#websocket',
     });
 
     ws.on('pong', () => { ws.isAlive = true; });

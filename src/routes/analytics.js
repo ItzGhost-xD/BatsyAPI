@@ -1,3 +1,11 @@
+/**
+ * BatsyAPI — Discord Presence API
+ * Developer : Venom
+ * Team      : Veyron Labs
+ * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
+ * License   : MIT © 2024 Veyron Labs
+ */
+
 const router = require('express').Router();
 const { PresenceSnapshot, RequestLog } = require('../models');
 const { heavyLimiter } = require('../middleware/rateLimit');

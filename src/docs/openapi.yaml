@@ -25,7 +25,7 @@ info:
     Add `?format=json` or send `Accept: application/json` to always get JSON.
 
     ## WebSocket
-    Connect to `ws://localhost:3000/ws` in development — see the [WebSocket docs](#section/WebSocket-Protocol) below.
+    Connect to `ws://your-host/ws` — see the [WebSocket docs](#section/WebSocket-Protocol) below.
 
     ## WebSocket Protocol
     After connecting, send JSON messages:
@@ -40,13 +40,13 @@ info:
 
   version: 1.0.0
   contact:
-    name: ItzGhost-xD
-    url: https://github.com/ItzGhost-xD/BatsyAPI
+    name: API Support
+    url: https://github.com/your-org/discord-presence-api
 
 servers:
   - url: http://localhost:3000/v1
     description: Local development
-  - url: https://api.example.com/v1
+  - url: https://your-api.com/v1
     description: Production
 
 tags:

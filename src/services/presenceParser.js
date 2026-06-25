@@ -1,4 +1,12 @@
 /**
+ * BatsyAPI — Discord Presence API
+ * Developer : Venom
+ * Team      : Veyron Labs
+ * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
+ * License   : MIT © 2024 Veyron Labs
+ */
+
+/**
  * presenceParser.js
  * Converts raw Discord.js Presence objects into clean, structured data.
  * Handles: custom status, Spotify, rich presence, streaming, game, watching, competing.
@@ -25,7 +33,7 @@ function avatarUrl(userId, hash, size = 256) {
 function bannerUrl(userId, hash) {
   if (!hash) return null;
   const fmt = hash.startsWith('a_') ? 'gif' : 'png';
-  return `${CDN}/banners/${userId}/${hash}.${fmt}?size=1024`;
+  return `${CDN}/banners/${userId}/${hash}.${fmt}?size=600`;
 }
 
 function applicationIconUrl(appId, hash) {

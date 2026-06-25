@@ -1,19 +1,15 @@
+/**
+ * BatsyAPI — Discord Presence API
+ * Developer : Venom
+ * Team      : Veyron Labs
+ * GitHub    : https://github.com/ItzGhost-xD/BatsyAPI
+ * License   : MIT © 2024 Veyron Labs
+ */
+
 const { createClient } = require('redis');
 const config = require('../../config');
 const logger = require('../utils/logger');
-const fs = require('fs');
 
-let src = fs.readFileSync('src/services/redis.js', 'utf8');
-if (!src.includes('getClient')) {
-  src = src.replace(
-    'module.exports = { connect, get, set, del, publish, subscribe, incr, shardKey };',
-    'function getClient() { return client; }\nmodule.exports = { connect, get, set, del, publish, subscribe, incr, shardKey, getClient };'
-  );
-  fs.writeFileSync('src/services/redis.js', src);
-  console.log('added getClient');
-} else {
-  console.log('already has getClient');
-}
 let client = null;
 let pubClient = null;  // dedicated publish client
 
@@ -96,4 +92,5 @@ function shardKey(base) {
   return `s${shard}:${base}`;
 }
 
-module.exports = { connect, get, set, del, publish, subscribe, incr, shardKey };
+function getClient() { return client; }
+module.exports = { connect, get, set, del, publish, subscribe, incr, shardKey, getClient };
